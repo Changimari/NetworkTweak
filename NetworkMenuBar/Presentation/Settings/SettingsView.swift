@@ -153,7 +153,7 @@ struct SettingsView: View {
                 Spacer(minLength: 8)
 
                 Button(role: .destructive) {
-                    NSApplication.shared.terminate(nil)
+                    exit(0)
                 } label: {
                     Label("お疲れ様でした", systemImage: "power")
                         .font(.caption)
