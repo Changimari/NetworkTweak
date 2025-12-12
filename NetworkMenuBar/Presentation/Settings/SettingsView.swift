@@ -42,8 +42,9 @@ struct SettingsView: View {
                         Label("About", systemImage: "info.circle")
                     }
             }
+            .padding(.top, 10)
         }
-        .frame(width: 450, height: 350)
+        .frame(width: 400, height: 450)
         .onAppear {
             loadSettings()
         }
@@ -111,60 +112,56 @@ struct SettingsView: View {
 
     /// このアプリについてタブ
     private var aboutTab: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "network")
-                .font(.system(size: 48))
-                .foregroundStyle(.linearGradient(
-                    colors: [.blue, .purple, .pink],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
+        ScrollView {
+            VStack(spacing: 10) {
+                Image(systemName: "network")
+                    .font(.system(size: 36))
+                    .foregroundStyle(.linearGradient(
+                        colors: [.blue, .purple, .pink],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
 
-            Text("NetworkTweak")
-                .font(.title)
-                .fontWeight(.bold)
+                Text("NetworkTweak")
+                    .font(.title3)
+                    .fontWeight(.bold)
 
-            Text("v1.0.0 (たぶん安定版)")
-                .font(.caption)
-                .foregroundColor(.secondary)
+                Text("v1.0.0 (たぶん安定版)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
 
-            Divider().padding(.horizontal, 40)
-
-            VStack(spacing: 4) {
-                Text("DHCPと固定IPを行ったり来たりする人が")
-                Text("ちょっと楽になったり、ならなかったりするアプリ")
-            }
-            .font(.callout)
-            .multilineTextAlignment(.center)
-            .foregroundColor(.secondary)
-
-            Spacer()
-
-            VStack(spacing: 4) {
-                Text("- 豆知識 -")
+                Text("DHCPと固定IPを行ったり来たりする人が\nちょっと楽になったり、ならなかったりするアプリ")
                     .font(.caption)
-                    .fontWeight(.medium)
-                Text("このアプリを使っても")
-                Text("ネットワークの問題は解決しないかもしれません。")
-                Text("でも、設定画面を開く手間は省けます。たぶん。")
-            }
-            .font(.caption2)
-            .foregroundColor(.secondary)
-            .multilineTextAlignment(.center)
-            .padding(8)
-            .background(Color(NSColor.controlBackgroundColor))
-            .cornerRadius(8)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.secondary)
 
-            Spacer()
+                Divider().padding(.horizontal, 40)
 
-            Button(role: .destructive) {
-                NSApplication.shared.terminate(nil)
-            } label: {
-                Label("お疲れ様でした", systemImage: "power")
+                VStack(spacing: 2) {
+                    Text("- 豆知識 -")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                    Text("このアプリを使っても\nネットワークの問題は解決しないかもしれません。\nでも、設定画面を開く手間は省けます。たぶん。")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(6)
+                .background(Color(NSColor.controlBackgroundColor))
+                .cornerRadius(6)
+
+                Spacer(minLength: 8)
+
+                Button(role: .destructive) {
+                    NSApplication.shared.terminate(nil)
+                } label: {
+                    Label("お疲れ様でした", systemImage: "power")
+                        .font(.caption)
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.bordered)
+            .padding()
         }
-        .padding()
     }
 
     /// 設定を読み込み

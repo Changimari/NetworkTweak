@@ -80,7 +80,6 @@ struct MainPopoverView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView()
                 .environmentObject(appState)
-                .frame(width: 450, height: 350)
         }
         .task {
             // 初回更新
