@@ -1,0 +1,465 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		198F71BF0DF42A1277544DA2 /* NetworkSetupCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5996CF82A7AD6FE0394AAEA /* NetworkSetupCommand.swift */; };
+		319272ADF12C1CABF7B707EA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 979D2413508E356B431A32B0 /* AppDelegate.swift */; };
+		355F8AEE20078CF9CE63A377 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4E67E742B725CB03F368573D /* Assets.xcassets */; };
+		54E96BF7914673E8351BA0FD /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BBF1B16C890030C958EA35D /* AppState.swift */; };
+		58742A9D37A9ECB60EF00D24 /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3313E217B345CBE66E0504 /* NetworkError.swift */; };
+		5E1D9707CBEABE793D367D69 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F346EC674A0A795C0CE39 /* StatusBarController.swift */; };
+		69C853E1BEA1EDA8632A3D03 /* IPMemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A628E3EBD83854A6C8DB57 /* IPMemo.swift */; };
+		A4A83AD06AC2EBA2685DAEB0 /* NetworkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69834F72C06BE4A8D7A0B54A /* NetworkAdapter.swift */; };
+		BCAF2AC2A084EBD3D67C5176 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B11EC3C6930D13A5DB3D0C3 /* NetworkManager.swift */; };
+		DCC097FA562C4D72D0504093 /* NetworkMenuBarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75B1044BD65F9C0478F8AB0 /* NetworkMenuBarApp.swift */; };
+		F24D5654506AD7659E4636E6 /* MainPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B79EEB11D158B50358EF44 /* MainPopoverView.swift */; };
+		F374779579166DF960200977 /* IPConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E8421915A6B6FC1A8BD012 /* IPConfiguration.swift */; };
+		F5063467687D99EB778DC1A4 /* AdapterDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB40E7C510AEEDB27F67CEE /* AdapterDetailView.swift */; };
+		F67DFC8477BCF44A109D4639 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7968750B43558C225A3C3DA /* SettingsView.swift */; };
+		PRIV0001000000000000001 /* PrivilegeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRIV0002000000000000001 /* PrivilegeManager.swift */; };
+		SPEED001000000000000001 /* NetworkSpeedMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPEED002000000000000001 /* NetworkSpeedMonitor.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0E8E7ACC877A48F0B4E297EF /* NetworkMenuBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NetworkMenuBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BB40E7C510AEEDB27F67CEE /* AdapterDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdapterDetailView.swift; sourceTree = "<group>"; };
+		PRIV0002000000000000001 /* PrivilegeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeManager.swift; sourceTree = "<group>"; };
+		SPEED002000000000000001 /* NetworkSpeedMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSpeedMonitor.swift; sourceTree = "<group>"; };
+		418F346EC674A0A795C0CE39 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+		4E67E742B725CB03F368573D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		52E8421915A6B6FC1A8BD012 /* IPConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPConfiguration.swift; sourceTree = "<group>"; };
+		69834F72C06BE4A8D7A0B54A /* NetworkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkAdapter.swift; sourceTree = "<group>"; };
+		6BBF1B16C890030C958EA35D /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		73458B42D2909D7CD9EE39ED /* NetworkMenuBar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NetworkMenuBar.entitlements; sourceTree = "<group>"; };
+		8B11EC3C6930D13A5DB3D0C3 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
+		979D2413508E356B431A32B0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		9E3313E217B345CBE66E0504 /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
+		A1C0AEFA2834CB6A73022797 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		B5996CF82A7AD6FE0394AAEA /* NetworkSetupCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSetupCommand.swift; sourceTree = "<group>"; };
+		C9B79EEB11D158B50358EF44 /* MainPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainPopoverView.swift; sourceTree = "<group>"; };
+		D4A628E3EBD83854A6C8DB57 /* IPMemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPMemo.swift; sourceTree = "<group>"; };
+		E75B1044BD65F9C0478F8AB0 /* NetworkMenuBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMenuBarApp.swift; sourceTree = "<group>"; };
+		E7968750B43558C225A3C3DA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		04A5C0160488502B9303991A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4E67E742B725CB03F368573D /* Assets.xcassets */,
+				A1C0AEFA2834CB6A73022797 /* Info.plist */,
+				73458B42D2909D7CD9EE39ED /* NetworkMenuBar.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		221462580AA3D547ED5712B5 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				979D2413508E356B431A32B0 /* AppDelegate.swift */,
+				6BBF1B16C890030C958EA35D /* AppState.swift */,
+				E75B1044BD65F9C0478F8AB0 /* NetworkMenuBarApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		355816C16447B54A44E8650E /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				E7968750B43558C225A3C3DA /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		58614B6718FE523F21F0963D /* Business */ = {
+			isa = PBXGroup;
+			children = (
+				9594343900B1DD6C90EE264C /* Network */,
+				PRIV0003000000000000001 /* Privilege */,
+			);
+			path = Business;
+			sourceTree = "<group>";
+		};
+		PRIV0003000000000000001 /* Privilege */ = {
+			isa = PBXGroup;
+			children = (
+				PRIV0002000000000000001 /* PrivilegeManager.swift */,
+			);
+			path = Privilege;
+			sourceTree = "<group>";
+		};
+		805A1BE666B1CB88AFAC1A0A = {
+			isa = PBXGroup;
+			children = (
+				A7C010338A55B9608964C242 /* NetworkMenuBar */,
+				CC0750810757026A26837ABC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		829A5D2CB167182E0398F92D /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				C971B7EB94D6DDA516756C4A /* Models */,
+				E8401A1A461F5A7255E36C26 /* SystemIntegration */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		92B5DDFDC02F7142062B53F8 /* Popover */ = {
+			isa = PBXGroup;
+			children = (
+				3BB40E7C510AEEDB27F67CEE /* AdapterDetailView.swift */,
+				C9B79EEB11D158B50358EF44 /* MainPopoverView.swift */,
+			);
+			path = Popover;
+			sourceTree = "<group>";
+		};
+		9594343900B1DD6C90EE264C /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				8B11EC3C6930D13A5DB3D0C3 /* NetworkManager.swift */,
+				SPEED002000000000000001 /* NetworkSpeedMonitor.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+		95D34279A44D8BA63964E017 /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				418F346EC674A0A795C0CE39 /* StatusBarController.swift */,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
+		965C0C98BA5A85D580BD8D9F /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				95D34279A44D8BA63964E017 /* MenuBar */,
+				92B5DDFDC02F7142062B53F8 /* Popover */,
+				355816C16447B54A44E8650E /* Settings */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		A7C010338A55B9608964C242 /* NetworkMenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				221462580AA3D547ED5712B5 /* App */,
+				58614B6718FE523F21F0963D /* Business */,
+				829A5D2CB167182E0398F92D /* Data */,
+				965C0C98BA5A85D580BD8D9F /* Presentation */,
+				04A5C0160488502B9303991A /* Resources */,
+			);
+			path = NetworkMenuBar;
+			sourceTree = "<group>";
+		};
+		C971B7EB94D6DDA516756C4A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				52E8421915A6B6FC1A8BD012 /* IPConfiguration.swift */,
+				D4A628E3EBD83854A6C8DB57 /* IPMemo.swift */,
+				69834F72C06BE4A8D7A0B54A /* NetworkAdapter.swift */,
+				9E3313E217B345CBE66E0504 /* NetworkError.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		CC0750810757026A26837ABC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0E8E7ACC877A48F0B4E297EF /* NetworkMenuBar.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E8401A1A461F5A7255E36C26 /* SystemIntegration */ = {
+			isa = PBXGroup;
+			children = (
+				B5996CF82A7AD6FE0394AAEA /* NetworkSetupCommand.swift */,
+			);
+			path = SystemIntegration;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3C294135E6438313A39A7A2F /* NetworkMenuBar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB11B7D02E5E6388FE5B9C38 /* Build configuration list for PBXNativeTarget "NetworkMenuBar" */;
+			buildPhases = (
+				B530A6D20C99F159C76C675F /* Sources */,
+				2BBAEE5871CDDE06D295B926 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NetworkMenuBar;
+			packageProductDependencies = (
+			);
+			productName = NetworkMenuBar;
+			productReference = 0E8E7ACC877A48F0B4E297EF /* NetworkMenuBar.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9DB22C209758B35D2EB4414B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					3C294135E6438313A39A7A2F = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 16A79714AA5989CC1992BDC5 /* Build configuration list for PBXProject "NetworkMenuBar" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 805A1BE666B1CB88AFAC1A0A;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3C294135E6438313A39A7A2F /* NetworkMenuBar */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2BBAEE5871CDDE06D295B926 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				355F8AEE20078CF9CE63A377 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B530A6D20C99F159C76C675F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F5063467687D99EB778DC1A4 /* AdapterDetailView.swift in Sources */,
+				319272ADF12C1CABF7B707EA /* AppDelegate.swift in Sources */,
+				54E96BF7914673E8351BA0FD /* AppState.swift in Sources */,
+				F374779579166DF960200977 /* IPConfiguration.swift in Sources */,
+				69C853E1BEA1EDA8632A3D03 /* IPMemo.swift in Sources */,
+				F24D5654506AD7659E4636E6 /* MainPopoverView.swift in Sources */,
+				A4A83AD06AC2EBA2685DAEB0 /* NetworkAdapter.swift in Sources */,
+				58742A9D37A9ECB60EF00D24 /* NetworkError.swift in Sources */,
+				BCAF2AC2A084EBD3D67C5176 /* NetworkManager.swift in Sources */,
+				DCC097FA562C4D72D0504093 /* NetworkMenuBarApp.swift in Sources */,
+				198F71BF0DF42A1277544DA2 /* NetworkSetupCommand.swift in Sources */,
+				PRIV0001000000000000001 /* PrivilegeManager.swift in Sources */,
+				SPEED001000000000000001 /* NetworkSpeedMonitor.swift in Sources */,
+				F67DFC8477BCF44A109D4639 /* SettingsView.swift in Sources */,
+				5E1D9707CBEABE793D367D69 /* StatusBarController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		14C4C40C35D7D4E04CC72BE3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = NetworkTweak;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		1BDC89C4D4B7E0E6C299507D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = NetworkTweak;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		2FEA716CC0D98D1A46C4FFBA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = NetworkMenuBar/Resources/NetworkMenuBar.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = NetworkMenuBar/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakai.NetworkTweak;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		D8215DBC73810945523E65DF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = NetworkMenuBar/Resources/NetworkMenuBar.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = NetworkMenuBar/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakai.NetworkTweak;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		16A79714AA5989CC1992BDC5 /* Build configuration list for PBXProject "NetworkMenuBar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1BDC89C4D4B7E0E6C299507D /* Debug */,
+				14C4C40C35D7D4E04CC72BE3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FB11B7D02E5E6388FE5B9C38 /* Build configuration list for PBXNativeTarget "NetworkMenuBar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D8215DBC73810945523E65DF /* Debug */,
+				2FEA716CC0D98D1A46C4FFBA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9DB22C209758B35D2EB4414B /* Project object */;
+}
