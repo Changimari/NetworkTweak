@@ -23,6 +23,7 @@
 		F67DFC8477BCF44A109D4639 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7968750B43558C225A3C3DA /* SettingsView.swift */; };
 		PRIV0001000000000000001 /* PrivilegeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRIV0002000000000000001 /* PrivilegeManager.swift */; };
 		SPEED001000000000000001 /* NetworkSpeedMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPEED002000000000000001 /* NetworkSpeedMonitor.swift */; };
+		UPDT0001000000000000001 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = UPDT0002000000000000001 /* UpdateChecker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		3BB40E7C510AEEDB27F67CEE /* AdapterDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdapterDetailView.swift; sourceTree = "<group>"; };
 		PRIV0002000000000000001 /* PrivilegeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeManager.swift; sourceTree = "<group>"; };
 		SPEED002000000000000001 /* NetworkSpeedMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSpeedMonitor.swift; sourceTree = "<group>"; };
+		UPDT0002000000000000001 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		418F346EC674A0A795C0CE39 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
 		4E67E742B725CB03F368573D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		52E8421915A6B6FC1A8BD012 /* IPConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPConfiguration.swift; sourceTree = "<group>"; };
@@ -81,8 +83,17 @@
 			children = (
 				9594343900B1DD6C90EE264C /* Network */,
 				PRIV0003000000000000001 /* Privilege */,
+				UPDT0003000000000000001 /* Update */,
 			);
 			path = Business;
+			sourceTree = "<group>";
+		};
+		UPDT0003000000000000001 /* Update */ = {
+			isa = PBXGroup;
+			children = (
+				UPDT0002000000000000001 /* UpdateChecker.swift */,
+			);
+			path = Update;
 			sourceTree = "<group>";
 		};
 		PRIV0003000000000000001 /* Privilege */ = {
@@ -271,6 +282,7 @@
 				SPEED001000000000000001 /* NetworkSpeedMonitor.swift in Sources */,
 				F67DFC8477BCF44A109D4639 /* SettingsView.swift in Sources */,
 				5E1D9707CBEABE793D367D69 /* StatusBarController.swift in Sources */,
+				UPDT0001000000000000001 /* UpdateChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -327,7 +339,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = NetworkTweak;
@@ -394,7 +406,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

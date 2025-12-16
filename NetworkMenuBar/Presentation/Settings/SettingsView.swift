@@ -4,6 +4,7 @@ import ServiceManagement
 /// 設定画面
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
+    @StateObject private var updateChecker = UpdateChecker.shared
     @Environment(\.dismiss) var dismiss
     @State private var launchAtLogin: Bool = false
     @State private var showSpeedInMenuBar: Bool = false
@@ -126,7 +127,7 @@ struct SettingsView: View {
                     .font(.title3)
                     .fontWeight(.bold)
 
-                Text("v1.0.0 (たぶん安定版)")
+                Text("v\(updateChecker.currentVersion)")
                     .font(.caption2)
                     .foregroundColor(.secondary)
 
@@ -134,6 +135,11 @@ struct SettingsView: View {
                     .font(.caption)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
+
+                Divider().padding(.horizontal, 40)
+
+                // アップデートセクション
+                updateSection
 
                 Divider().padding(.horizontal, 40)
 
@@ -152,15 +158,100 @@ struct SettingsView: View {
 
                 Spacer(minLength: 8)
 
-                Button(role: .destructive) {
-                    exit(0)
-                } label: {
-                    Label("お疲れ様でした", systemImage: "power")
-                        .font(.caption)
+                HStack(spacing: 12) {
+                    Button {
+                        updateChecker.openRepositoryPage()
+                    } label: {
+                        Label("GitHub", systemImage: "link")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button(role: .destructive) {
+                        exit(0)
+                    } label: {
+                        Label("お疲れ様でした", systemImage: "power")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
             }
             .padding()
+        }
+    }
+
+    /// アップデートセクション
+    private var updateSection: some View {
+        VStack(spacing: 8) {
+            if updateChecker.isChecking {
+                HStack {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                    Text("アップデートを確認中...")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            } else if let updateInfo = updateChecker.updateInfo {
+                if updateInfo.isUpdateAvailable {
+                    VStack(spacing: 6) {
+                        HStack {
+                            Image(systemName: "arrow.down.circle.fill")
+                                .foregroundColor(.green)
+                            Text("新しいバージョンがあります!")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+
+                        Text("v\(updateInfo.currentVersion) → v\(updateInfo.latestVersion)")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+
+                        Button {
+                            updateChecker.openDownloadPage()
+                        } label: {
+                            Label("ダウンロード", systemImage: "arrow.down.to.line")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    .padding(8)
+                    .background(Color.green.opacity(0.1))
+                    .cornerRadius(8)
+                } else {
+                    HStack {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text("最新バージョンです")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            } else if let error = updateChecker.error {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundColor(.orange)
+                    Text(error)
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Button {
+                Task {
+                    await updateChecker.checkForUpdates()
+                }
+            } label: {
+                Label("アップデートを確認", systemImage: "arrow.clockwise")
+                    .font(.caption)
+            }
+            .buttonStyle(.bordered)
+            .disabled(updateChecker.isChecking)
+
+            if let lastCheck = updateChecker.lastCheckDate {
+                Text("最終確認: \(lastCheck.formatted(date: .abbreviated, time: .shortened))")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
         }
     }
 
