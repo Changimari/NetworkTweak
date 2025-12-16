@@ -936,20 +936,57 @@ struct SegmentConnectView: View {
     let targetIP: String  // メモのIP（ターゲットセグメント）
 
     @State private var selectedAdapterName: String?
+    @State private var subnetMask: String = "255.255.255.0"
+    @State private var router: String = ""
     @State private var isSearching = false
     @State private var foundIP: String?
     @State private var errorMessage: String?
     @State private var isApplying = false
+    @State private var searchProgress: String = ""
 
-    // ターゲットIPからセグメントを取得
-    private var segment: String? {
-        let parts = targetIP.split(separator: ".")
-        guard parts.count == 4 else { return nil }
-        return "\(parts[0]).\(parts[1]).\(parts[2])"
+    /// サブネットマスクからホスト範囲を計算
+    private var hostRange: (start: UInt32, end: UInt32)? {
+        guard let targetIPValue = ipToUInt32(targetIP),
+              let maskValue = ipToUInt32(subnetMask) else { return nil }
+
+        let networkAddress = targetIPValue & maskValue
+        let broadcastAddress = networkAddress | (~maskValue)
+
+        // ホスト範囲: ネットワークアドレス+1 〜 ブロードキャスト-1
+        let hostStart = networkAddress + 1
+        let hostEnd = broadcastAddress - 1
+
+        guard hostStart <= hostEnd else { return nil }
+        return (hostStart, hostEnd)
+    }
+
+    /// 検索開始位置（範囲の後半80%から開始、DHCPと被りにくい）
+    private var searchStartIP: UInt32? {
+        guard let range = hostRange else { return nil }
+        let totalHosts = range.end - range.start + 1
+        let offset = UInt32(Double(totalHosts) * 0.8)
+        return range.start + offset
+    }
+
+    /// デフォルトルーター（ネットワークアドレス+1）
+    private var defaultRouter: String {
+        guard let targetIPValue = ipToUInt32(targetIP),
+              let maskValue = ipToUInt32(subnetMask) else { return "" }
+        let networkAddress = targetIPValue & maskValue
+        return uint32ToIP(networkAddress + 1)
+    }
+
+    /// ネットワーク情報の表示用テキスト
+    private var networkInfo: String {
+        guard let range = hostRange else { return "無効なサブネット設定" }
+        let startIP = uint32ToIP(range.start)
+        let endIP = uint32ToIP(range.end)
+        let hostCount = range.end - range.start + 1
+        return "\(startIP) 〜 \(endIP) (\(hostCount)ホスト)"
     }
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             // ヘッダー
             HStack {
                 Text("このセグメントに接続")
@@ -962,26 +999,59 @@ struct SegmentConnectView: View {
 
             Divider()
 
-            // ターゲット情報
+            // ターゲットIP表示
             VStack(alignment: .leading, spacing: 4) {
-                Text("接続先セグメント")
+                Text("ターゲットIP")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                if let segment = segment {
-                    Text("\(segment).x")
-                        .font(.system(.body, design: .monospaced))
-                        .fontWeight(.medium)
-                } else {
-                    Text("無効なIPアドレス")
-                        .foregroundColor(.red)
+                Text(targetIP)
+                    .font(.system(.body, design: .monospaced))
+                    .fontWeight(.medium)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // サブネットマスク入力
+            VStack(alignment: .leading, spacing: 4) {
+                Text("サブネットマスク")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                HStack(spacing: 8) {
+                    IPTextField(text: $subnetMask, placeholder: "255.255.255.0")
+                    // よく使うサブネットマスクのプリセット
+                    Menu {
+                        Button("255.255.255.0 (/24)") { subnetMask = "255.255.255.0"; updateRouterIfNeeded() }
+                        Button("255.255.255.128 (/25)") { subnetMask = "255.255.255.128"; updateRouterIfNeeded() }
+                        Button("255.255.254.0 (/23)") { subnetMask = "255.255.254.0"; updateRouterIfNeeded() }
+                        Button("255.255.252.0 (/22)") { subnetMask = "255.255.252.0"; updateRouterIfNeeded() }
+                        Button("255.255.240.0 (/20)") { subnetMask = "255.255.240.0"; updateRouterIfNeeded() }
+                        Button("255.255.128.0 (/17)") { subnetMask = "255.255.128.0"; updateRouterIfNeeded() }
+                        Button("255.255.0.0 (/16)") { subnetMask = "255.255.0.0"; updateRouterIfNeeded() }
+                    } label: {
+                        Image(systemName: "chevron.down.circle")
+                            .foregroundColor(.secondary)
+                    }
+                    .menuStyle(.borderlessButton)
+                    .frame(width: 24)
                 }
+                Text(networkInfo)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            // ルーター入力
+            VStack(alignment: .leading, spacing: 4) {
+                Text("ルーター")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                IPTextField(text: $router, placeholder: defaultRouter)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
             Divider()
 
             // アダプタ選択
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("アダプタを選択")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -1001,7 +1071,7 @@ struct SegmentConnectView: View {
                             }
                         }
                     }
-                    .frame(maxHeight: 150)
+                    .frame(maxHeight: 100)
                 }
             }
 
@@ -1009,11 +1079,18 @@ struct SegmentConnectView: View {
 
             // 状態表示
             if isSearching {
-                HStack {
-                    ProgressView()
-                        .scaleEffect(0.8)
-                    Text("空きIPを検索中...")
-                        .foregroundColor(.secondary)
+                VStack(spacing: 4) {
+                    HStack {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text("空きIPを検索中...")
+                            .foregroundColor(.secondary)
+                    }
+                    if !searchProgress.isEmpty {
+                        Text(searchProgress)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
                 }
             } else if let foundIP = foundIP {
                 VStack(alignment: .leading, spacing: 4) {
@@ -1052,31 +1129,66 @@ struct SegmentConnectView: View {
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .disabled(selectedAdapterName == nil || isSearching || isApplying || segment == nil)
+            .disabled(selectedAdapterName == nil || isSearching || isApplying || hostRange == nil)
         }
         .padding()
-        .frame(width: 320, height: 400)
+        .frame(width: 360, height: 520)
+        .onAppear {
+            router = defaultRouter
+        }
+        .onChange(of: subnetMask) { _, _ in
+            // サブネットマスク変更時に検索結果をリセット
+            foundIP = nil
+            errorMessage = nil
+        }
+    }
+
+    private func updateRouterIfNeeded() {
+        router = defaultRouter
     }
 
     /// 空きIPを検索
     private func searchAvailableIP() {
-        guard let segment = segment else { return }
+        guard let range = hostRange,
+              let startIP = searchStartIP else { return }
 
         isSearching = true
         errorMessage = nil
         foundIP = nil
+        searchProgress = ""
 
         Task {
-            // .200から.254まで順番に試す
-            for i in 200...254 {
-                let ip = "\(segment).\(i)"
+            // 検索開始位置から末尾まで
+            for ipValue in startIP...range.end {
+                let ip = uint32ToIP(ipValue)
+                await MainActor.run {
+                    searchProgress = "検索中: \(ip)"
+                }
 
-                // pingで確認
                 let available = await checkIPAvailable(ip)
                 if available {
                     await MainActor.run {
                         foundIP = ip
                         isSearching = false
+                        searchProgress = ""
+                    }
+                    return
+                }
+            }
+
+            // 見つからなかった場合、先頭から検索開始位置まで
+            for ipValue in range.start..<startIP {
+                let ip = uint32ToIP(ipValue)
+                await MainActor.run {
+                    searchProgress = "検索中: \(ip)"
+                }
+
+                let available = await checkIPAvailable(ip)
+                if available {
+                    await MainActor.run {
+                        foundIP = ip
+                        isSearching = false
+                        searchProgress = ""
                     }
                     return
                 }
@@ -1085,6 +1197,7 @@ struct SegmentConnectView: View {
             await MainActor.run {
                 errorMessage = "空きIPが見つかりませんでした"
                 isSearching = false
+                searchProgress = ""
             }
         }
     }
@@ -1094,7 +1207,7 @@ struct SegmentConnectView: View {
         return await withCheckedContinuation { continuation in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/sbin/ping")
-            process.arguments = ["-c", "1", "-W", "500", ip]  // 1回、500msタイムアウト
+            process.arguments = ["-c", "1", "-W", "300", ip]  // 1回、300msタイムアウト
 
             let pipe = Pipe()
             process.standardOutput = pipe
@@ -1114,17 +1227,18 @@ struct SegmentConnectView: View {
     /// 設定を適用
     private func applyConfiguration() {
         guard let adapterName = selectedAdapterName,
-              let ip = foundIP,
-              let segment = segment else { return }
+              let ip = foundIP else { return }
 
         isApplying = true
+
+        let routerToUse = router.isEmpty ? defaultRouter : router
 
         let config = IPConfiguration(
             configureIPv4: .manual,
             ipv4Address: ip,
-            subnetMask: "255.255.255.0",
-            router: "\(segment).1",
-            dnsServers: []
+            subnetMask: subnetMask,
+            router: routerToUse,
+            dnsServers: ["8.8.8.8", "1.1.1.1"]  // 公開DNSをデフォルトで設定
         )
 
         Task {
@@ -1141,6 +1255,25 @@ struct SegmentConnectView: View {
                 }
             }
         }
+    }
+
+    // MARK: - IP変換ユーティリティ
+
+    /// IPアドレス文字列をUInt32に変換
+    private func ipToUInt32(_ ip: String) -> UInt32? {
+        let parts = ip.split(separator: ".").compactMap { UInt32($0) }
+        guard parts.count == 4,
+              parts.allSatisfy({ $0 <= 255 }) else { return nil }
+        return (parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]
+    }
+
+    /// UInt32をIPアドレス文字列に変換
+    private func uint32ToIP(_ value: UInt32) -> String {
+        let a = (value >> 24) & 0xFF
+        let b = (value >> 16) & 0xFF
+        let c = (value >> 8) & 0xFF
+        let d = value & 0xFF
+        return "\(a).\(b).\(c).\(d)"
     }
 }
 
