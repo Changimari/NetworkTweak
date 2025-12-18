@@ -149,11 +149,15 @@ final class UpdateChecker: ObservableObject {
         return .orderedSame
     }
 
-    /// ダウンロードページを開く
+    /// ダウンロードページを開いてアプリを終了
     func openDownloadPage() {
         guard let urlString = updateInfo?.downloadUrl ?? updateInfo?.releasePageUrl,
               let url = URL(string: urlString) else { return }
         NSWorkspace.shared.open(url)
+        // 少し遅延してからアプリを終了（ブラウザが開くのを待つ）
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            NSApplication.shared.terminate(nil)
+        }
     }
 
     /// リリースページを開く

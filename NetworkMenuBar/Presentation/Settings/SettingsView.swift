@@ -12,6 +12,8 @@ struct SettingsView: View {
     @State private var showIPv6: Bool = false
     @State private var autoFillGateway: Bool = true
     @State private var autoResetOnNetworkChange: Bool = true
+    @State private var showEmergencyReset = false
+    @State private var isResetting = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -166,6 +168,30 @@ struct SettingsView: View {
 
                 Spacer(minLength: 8)
 
+                Divider().padding(.horizontal, 40)
+
+                // 緊急リセットセクション
+                VStack(spacing: 6) {
+                    Button {
+                        showEmergencyReset = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle")
+                            Text(isResetting ? "リセット中..." : "緊急リセット")
+                        }
+                        .font(.caption)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.orange)
+                    .disabled(isResetting)
+
+                    Text("全アダプタをDHCPにリセットします")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer(minLength: 8)
+
                 HStack(spacing: 12) {
                     Button {
                         updateChecker.openRepositoryPage()
@@ -185,6 +211,29 @@ struct SettingsView: View {
                 }
             }
             .padding()
+        }
+        .alert("緊急リセット", isPresented: $showEmergencyReset) {
+            Button("キャンセル", role: .cancel) {}
+            Button("リセット", role: .destructive) {
+                performEmergencyReset()
+            }
+        } message: {
+            Text("接続中の全ネットワークアダプタをDHCPにリセットします。\nネット接続に問題がある場合に使用してください。")
+        }
+    }
+
+    /// 緊急リセットを実行
+    private func performEmergencyReset() {
+        isResetting = true
+        Task {
+            for adapter in appState.networkManager.connectedAdapters {
+                do {
+                    try await appState.networkManager.emergencyResetToDHCP(serviceName: adapter.hardwarePort)
+                } catch {
+                    print("Emergency reset failed for \(adapter.hardwarePort): \(error)")
+                }
+            }
+            isResetting = false
         }
     }
 
