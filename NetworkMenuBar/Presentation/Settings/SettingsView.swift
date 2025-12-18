@@ -11,6 +11,7 @@ struct SettingsView: View {
     @State private var refreshInterval: Double = 2.0
     @State private var showIPv6: Bool = false
     @State private var autoFillGateway: Bool = true
+    @State private var autoResetOnNetworkChange: Bool = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -78,6 +79,13 @@ struct SettingsView: View {
                         appState.settings.autoFillGateway = newValue
                         appState.saveSettings()
                     }
+
+                Toggle("ネットワーク変更時に自動でDHCPに戻す", isOn: $autoResetOnNetworkChange)
+                    .onChange(of: autoResetOnNetworkChange) { _, newValue in
+                        appState.settings.autoResetOnNetworkChange = newValue
+                        appState.saveSettings()
+                    }
+                    .help("Wi-Fi接続先が変わった時、手動IP設定を自動でDHCPにリセットします")
             }
         }
         .formStyle(.grouped)
@@ -262,6 +270,7 @@ struct SettingsView: View {
         refreshInterval = appState.settings.refreshInterval
         showIPv6 = appState.settings.showIPv6
         autoFillGateway = appState.settings.autoFillGateway
+        autoResetOnNetworkChange = appState.settings.autoResetOnNetworkChange
     }
 
     /// ログイン時起動を設定

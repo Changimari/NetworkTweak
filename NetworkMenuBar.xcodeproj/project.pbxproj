@@ -24,6 +24,7 @@
 		PRIV0001000000000000001 /* PrivilegeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRIV0002000000000000001 /* PrivilegeManager.swift */; };
 		SPEED001000000000000001 /* NetworkSpeedMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPEED002000000000000001 /* NetworkSpeedMonitor.swift */; };
 		UPDT0001000000000000001 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = UPDT0002000000000000001 /* UpdateChecker.swift */; };
+		NCHG0001000000000000001 /* NetworkChangeMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = NCHG0002000000000000001 /* NetworkChangeMonitor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		PRIV0002000000000000001 /* PrivilegeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeManager.swift; sourceTree = "<group>"; };
 		SPEED002000000000000001 /* NetworkSpeedMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSpeedMonitor.swift; sourceTree = "<group>"; };
 		UPDT0002000000000000001 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
+		NCHG0002000000000000001 /* NetworkChangeMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkChangeMonitor.swift; sourceTree = "<group>"; };
 		418F346EC674A0A795C0CE39 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
 		4E67E742B725CB03F368573D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		52E8421915A6B6FC1A8BD012 /* IPConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPConfiguration.swift; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 			children = (
 				8B11EC3C6930D13A5DB3D0C3 /* NetworkManager.swift */,
 				SPEED002000000000000001 /* NetworkSpeedMonitor.swift */,
+				NCHG0002000000000000001 /* NetworkChangeMonitor.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -283,6 +286,7 @@
 				F67DFC8477BCF44A109D4639 /* SettingsView.swift in Sources */,
 				5E1D9707CBEABE793D367D69 /* StatusBarController.swift in Sources */,
 				UPDT0001000000000000001 /* UpdateChecker.swift in Sources */,
+				NCHG0001000000000000001 /* NetworkChangeMonitor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

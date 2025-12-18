@@ -35,6 +35,8 @@ struct MainPopoverView: View {
     @State private var showMemoSheet = false
     @State private var showSettings = false
     @State private var isRefreshing = false
+    @State private var showEmergencyReset = false
+    @State private var isResetting = false
     @StateObject private var refreshManager = AutoRefreshManager()
 
     var body: some View {
@@ -169,9 +171,46 @@ struct MainPopoverView: View {
                 }
                 .font(.caption)
             }
+
+            // 緊急リセットボタン
+            Button {
+                showEmergencyReset = true
+            } label: {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle")
+                    Text("緊急リセット")
+                }
+                .font(.caption)
+                .foregroundColor(.orange)
+            }
+            .buttonStyle(.borderless)
+            .help("全アダプタをDHCPにリセット")
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
+        .alert("緊急リセット", isPresented: $showEmergencyReset) {
+            Button("キャンセル", role: .cancel) {}
+            Button("リセット", role: .destructive) {
+                performEmergencyReset()
+            }
+        } message: {
+            Text("接続中の全ネットワークアダプタをDHCPにリセットします。\nネット接続に問題がある場合に使用してください。")
+        }
+    }
+
+    /// 緊急リセットを実行
+    private func performEmergencyReset() {
+        isResetting = true
+        Task {
+            for adapter in appState.networkManager.connectedAdapters {
+                do {
+                    try await appState.networkManager.emergencyResetToDHCP(serviceName: adapter.hardwarePort)
+                } catch {
+                    print("Emergency reset failed for \(adapter.hardwarePort): \(error)")
+                }
+            }
+            isResetting = false
+        }
     }
 }
 
