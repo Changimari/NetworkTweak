@@ -51,17 +51,45 @@ final class UpdateChecker: ObservableObject {
     @Published private(set) var isChecking = false
     @Published private(set) var lastCheckDate: Date?
     @Published private(set) var error: String?
+    @Published var showUpdateAlert = false
 
     private let githubRepo = "Changimari/NetworkTweak"
     private let userDefaultsKey = "lastUpdateCheck"
+    private let dismissedVersionKey = "dismissedUpdateVersion"
 
     /// 現在のアプリバージョン
     var currentVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
 
+    /// ユーザーがスキップしたバージョン
+    private var dismissedVersion: String? {
+        get { UserDefaults.standard.string(forKey: dismissedVersionKey) }
+        set { UserDefaults.standard.set(newValue, forKey: dismissedVersionKey) }
+    }
+
     private init() {
         lastCheckDate = UserDefaults.standard.object(forKey: userDefaultsKey) as? Date
+    }
+
+    /// 起動時のアップデートチェック
+    func checkOnLaunch() async {
+        await checkForUpdates()
+
+        // アップデートがあり、かつスキップしていないバージョンなら通知
+        if let info = updateInfo,
+           info.isUpdateAvailable,
+           dismissedVersion != info.latestVersion {
+            showUpdateAlert = true
+        }
+    }
+
+    /// このバージョンをスキップ
+    func dismissCurrentUpdate() {
+        if let latestVersion = updateInfo?.latestVersion {
+            dismissedVersion = latestVersion
+        }
+        showUpdateAlert = false
     }
 
     /// アップデートを確認

@@ -14,11 +14,14 @@ struct IPMemoFolder: Identifiable, Codable, Equatable {
 
     /// CSV形式でエクスポート
     func exportToCSV() -> String {
-        var csv = "名前,IPアドレス\n"
+        var csv = "名前,IPアドレス,ユーザー名,パスワード,メモ\n"
         for memo in memos {
             let escapedName = memo.name.replacingOccurrences(of: "\"", with: "\"\"")
             let escapedIP = memo.ipAddress.replacingOccurrences(of: "\"", with: "\"\"")
-            csv += "\"\(escapedName)\",\"\(escapedIP)\"\n"
+            let escapedUser = memo.username.replacingOccurrences(of: "\"", with: "\"\"")
+            let escapedPass = memo.password.replacingOccurrences(of: "\"", with: "\"\"")
+            let escapedNote = memo.note.replacingOccurrences(of: "\"", with: "\"\"")
+            csv += "\"\(escapedName)\",\"\(escapedIP)\",\"\(escapedUser)\",\"\(escapedPass)\",\"\(escapedNote)\"\n"
         }
         return csv
     }
@@ -29,11 +32,29 @@ struct IPMemo: Identifiable, Codable, Equatable {
     let id: UUID
     var name: String
     var ipAddress: String
+    var username: String
+    var password: String
+    var note: String
 
-    init(id: UUID = UUID(), name: String, ipAddress: String) {
+    init(id: UUID = UUID(), name: String, ipAddress: String,
+         username: String = "", password: String = "", note: String = "") {
         self.id = id
         self.name = name
         self.ipAddress = ipAddress
+        self.username = username
+        self.password = password
+        self.note = note
+    }
+
+    /// 後方互換性のためのカスタムデコーダー
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        ipAddress = try container.decode(String.self, forKey: .ipAddress)
+        username = try container.decodeIfPresent(String.self, forKey: .username) ?? ""
+        password = try container.decodeIfPresent(String.self, forKey: .password) ?? ""
+        note = try container.decodeIfPresent(String.self, forKey: .note) ?? ""
     }
 }
 
@@ -95,9 +116,11 @@ final class IPMemoStore: ObservableObject {
 
     // MARK: - メモ操作（フォルダ内）
 
-    func addMemo(to folderID: UUID, name: String, ipAddress: String) {
+    func addMemo(to folderID: UUID, name: String, ipAddress: String,
+                 username: String = "", password: String = "", note: String = "") {
         if let index = folders.firstIndex(where: { $0.id == folderID }) {
-            let memo = IPMemo(name: name, ipAddress: ipAddress)
+            let memo = IPMemo(name: name, ipAddress: ipAddress,
+                              username: username, password: password, note: note)
             folders[index].memos.append(memo)
             save()
         }
@@ -120,8 +143,10 @@ final class IPMemoStore: ObservableObject {
 
     // MARK: - 後方互換性：フォルダなしメモ操作
 
-    func add(name: String, ipAddress: String) {
-        let memo = IPMemo(name: name, ipAddress: ipAddress)
+    func add(name: String, ipAddress: String,
+             username: String = "", password: String = "", note: String = "") {
+        let memo = IPMemo(name: name, ipAddress: ipAddress,
+                          username: username, password: password, note: note)
         memos.append(memo)
         save()
     }

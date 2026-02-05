@@ -31,6 +31,7 @@ class AutoRefreshManager: ObservableObject {
 /// メインポップオーバービュー
 struct MainPopoverView: View {
     @EnvironmentObject var appState: AppState
+    @StateObject private var updateChecker = UpdateChecker.shared
     @State private var selectedAdapter: NetworkAdapter?
     @State private var showMemoSheet = false
     @State private var showSettings = false
@@ -39,6 +40,11 @@ struct MainPopoverView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // アップデート通知バナー
+            if updateChecker.showUpdateAlert, let info = updateChecker.updateInfo {
+                updateBanner(info: info)
+            }
+
             // ヘッダー
             headerView
 
@@ -99,6 +105,43 @@ struct MainPopoverView: View {
         .onDisappear {
             refreshManager.stop()
         }
+    }
+
+    /// アップデート通知バナー
+    private func updateBanner(info: UpdateInfo) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "arrow.down.circle.fill")
+                .foregroundColor(.white)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("アップデートがあります")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                Text("v\(info.latestVersion)")
+                    .font(.caption2)
+            }
+            .foregroundColor(.white)
+
+            Spacer()
+
+            Button("更新") {
+                updateChecker.openDownloadPage()
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            Button {
+                updateChecker.dismissCurrentUpdate()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.caption2)
+            }
+            .buttonStyle(.borderless)
+            .foregroundColor(.white.opacity(0.8))
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color.blue)
     }
 
     /// ヘッダービュー
@@ -234,6 +277,7 @@ struct IPMemoListView: View {
     @State private var draggedMemo: IPMemo?
     @State private var highlightedFolderID: UUID?
     @State private var segmentConnectMemo: IPMemo?
+    @State private var expandedMemoID: UUID?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -306,7 +350,8 @@ struct IPMemoListView: View {
                                 DraggableMemoRowView(
                                     memo: memo,
                                     draggedMemo: $draggedMemo,
-                                    onTap: { editingMemo = memo },
+                                    expandedMemoID: $expandedMemoID,
+                                    onEdit: { editingMemo = memo },
                                     onDelete: { appState.ipMemoStore.delete(memo) },
                                     onSegmentConnect: { segmentConnectMemo = memo }
                                 )
@@ -416,6 +461,165 @@ struct MemoRowView: View {
     }
 }
 
+/// コピー可能なフィールド行
+struct CopyableFieldRow: View {
+    let label: String
+    let value: String
+    var isMasked: Bool = false
+    @State private var showValue: Bool = false
+    @State private var copied: Bool = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+                .frame(width: 52, alignment: .leading)
+
+            if isMasked && !showValue {
+                Text("********")
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundColor(.primary)
+            } else {
+                Text(value)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundColor(.primary)
+                    .textSelection(.enabled)
+            }
+
+            Spacer()
+
+            if isMasked {
+                Button {
+                    showValue.toggle()
+                } label: {
+                    Image(systemName: showValue ? "eye.slash" : "eye")
+                        .font(.caption2)
+                }
+                .buttonStyle(.borderless)
+                .help(showValue ? "隠す" : "表示")
+            }
+
+            Button {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(value, forType: .string)
+                copied = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    copied = false
+                }
+            } label: {
+                Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                    .font(.caption2)
+                    .foregroundColor(copied ? .green : .secondary)
+            }
+            .buttonStyle(.borderless)
+            .help("コピー")
+        }
+    }
+}
+
+/// 展開可能なメモ行ビュー
+struct ExpandableMemoRowView: View {
+    let memo: IPMemo
+    @Binding var expandedMemoID: UUID?
+    let onEdit: () -> Void
+
+    @State private var ipCopied: Bool = false
+
+    private var isExpanded: Bool {
+        expandedMemoID == memo.id
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // ヘッダー
+            HStack {
+                Button {
+                    expandedMemoID = isExpanded ? nil : memo.id
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(memo.name)
+                                .fontWeight(.medium)
+                            Text(memo.ipAddress)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                // IPコピーボタン（常に表示）
+                Button {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(memo.ipAddress, forType: .string)
+                    ipCopied = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        ipCopied = false
+                    }
+                } label: {
+                    Image(systemName: ipCopied ? "checkmark" : "doc.on.doc")
+                        .font(.caption)
+                        .foregroundColor(ipCopied ? .green : .secondary)
+                }
+                .buttonStyle(.borderless)
+                .help("IPをコピー")
+            }
+
+            // 展開コンテンツ
+            if isExpanded {
+                expandedContent
+            }
+        }
+        .animation(.easeOut(duration: 0.2), value: isExpanded)
+    }
+
+    @ViewBuilder
+    private var expandedContent: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Divider()
+                    .frame(height: 1)
+                Spacer()
+                Button(action: onEdit) {
+                    Label("編集", systemImage: "pencil")
+                        .font(.caption)
+                }
+                .buttonStyle(.borderless)
+            }
+            .padding(.vertical, 4)
+
+            CopyableFieldRow(label: "IP", value: memo.ipAddress)
+
+            if !memo.username.isEmpty {
+                CopyableFieldRow(label: "ユーザー", value: memo.username)
+            }
+
+            if !memo.password.isEmpty {
+                CopyableFieldRow(label: "パスワード", value: memo.password, isMasked: true)
+            }
+
+            if !memo.note.isEmpty {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("メモ")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Text(memo.note)
+                        .font(.caption)
+                        .foregroundColor(.primary)
+                        .lineLimit(5)
+                }
+            }
+        }
+        .padding(.leading, 4)
+    }
+}
+
 /// フォルダ詳細ビュー
 struct FolderDetailView: View {
     @EnvironmentObject var appState: AppState
@@ -426,6 +630,7 @@ struct FolderDetailView: View {
     @State private var editingMemo: IPMemo?
     @State private var showExportPanel = false
     @State private var segmentConnectMemo: IPMemo?
+    @State private var expandedMemoID: UUID?
 
     // フォルダIDを保持（参照の安定性のため）
     private var folderID: UUID { folder.id }
@@ -488,28 +693,30 @@ struct FolderDetailView: View {
             } else {
                 List {
                     ForEach(memos) { memo in
-                        MemoRowView(memo: memo)
-                            .contentShape(Rectangle())
-                            .onTapGesture { editingMemo = memo }
-                            .contextMenu {
-                                Button {
-                                    segmentConnectMemo = memo
-                                } label: {
-                                    Label("このセグメントに接続", systemImage: "network")
-                                }
-                                Divider()
-                                Button {
-                                    appState.ipMemoStore.moveMemoToTopLevelByID(memo.id, from: folderID)
-                                } label: {
-                                    Label("フォルダから出す", systemImage: "tray.and.arrow.up")
-                                }
-                                Divider()
-                                Button(role: .destructive) {
-                                    appState.ipMemoStore.deleteMemoByID(memo.id, from: folderID)
-                                } label: {
-                                    Label("削除", systemImage: "trash")
-                                }
+                        ExpandableMemoRowView(
+                            memo: memo,
+                            expandedMemoID: $expandedMemoID,
+                            onEdit: { editingMemo = memo }
+                        )
+                        .contextMenu {
+                            Button {
+                                segmentConnectMemo = memo
+                            } label: {
+                                Label("このセグメントに接続", systemImage: "network")
                             }
+                            Divider()
+                            Button {
+                                appState.ipMemoStore.moveMemoToTopLevelByID(memo.id, from: folderID)
+                            } label: {
+                                Label("フォルダから出す", systemImage: "tray.and.arrow.up")
+                            }
+                            Divider()
+                            Button(role: .destructive) {
+                                appState.ipMemoStore.deleteMemoByID(memo.id, from: folderID)
+                            } label: {
+                                Label("削除", systemImage: "trash")
+                            }
+                        }
                     }
                 }
                 .listStyle(.plain)
@@ -605,11 +812,14 @@ struct IPMemoEditView: View {
 
     @State private var name: String = ""
     @State private var ipAddress: String = ""
+    @State private var username: String = ""
+    @State private var password: String = ""
+    @State private var note: String = ""
 
     var isEditing: Bool { memo != nil }
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             Text(isEditing ? "メモを編集" : "新規メモ")
                 .font(.headline)
 
@@ -617,6 +827,16 @@ struct IPMemoEditView: View {
                 .textFieldStyle(.roundedBorder)
 
             ASCIITextField(text: $ipAddress, placeholder: "IPアドレス")
+
+            TextField("ユーザー名", text: $username)
+                .textFieldStyle(.roundedBorder)
+
+            TextField("パスワード", text: $password)
+                .textFieldStyle(.roundedBorder)
+
+            TextField("メモ", text: $note, axis: .vertical)
+                .textFieldStyle(.roundedBorder)
+                .lineLimit(2...4)
 
             HStack {
                 Button("キャンセル") {
@@ -643,6 +863,9 @@ struct IPMemoEditView: View {
                     if isEditing, var updatedMemo = memo {
                         updatedMemo.name = name
                         updatedMemo.ipAddress = ipAddress
+                        updatedMemo.username = username
+                        updatedMemo.password = password
+                        updatedMemo.note = note
                         if let folderID = folderID {
                             appState.ipMemoStore.updateMemo(updatedMemo, in: folderID)
                         } else {
@@ -650,9 +873,11 @@ struct IPMemoEditView: View {
                         }
                     } else {
                         if let folderID = folderID {
-                            appState.ipMemoStore.addMemo(to: folderID, name: name, ipAddress: ipAddress)
+                            appState.ipMemoStore.addMemo(to: folderID, name: name, ipAddress: ipAddress,
+                                                          username: username, password: password, note: note)
                         } else {
-                            appState.ipMemoStore.add(name: name, ipAddress: ipAddress)
+                            appState.ipMemoStore.add(name: name, ipAddress: ipAddress,
+                                                      username: username, password: password, note: note)
                         }
                     }
                     dismiss()
@@ -662,11 +887,14 @@ struct IPMemoEditView: View {
             }
         }
         .padding()
-        .frame(width: 280)
+        .frame(width: 300)
         .onAppear {
             if let memo = memo {
                 name = memo.name
                 ipAddress = memo.ipAddress
+                username = memo.username
+                password = memo.password
+                note = memo.note
             }
         }
     }
@@ -676,48 +904,49 @@ struct IPMemoEditView: View {
 struct DraggableMemoRowView: View {
     let memo: IPMemo
     @Binding var draggedMemo: IPMemo?
-    let onTap: () -> Void
+    @Binding var expandedMemoID: UUID?
+    let onEdit: () -> Void
     var onDelete: (() -> Void)? = nil
     var onSegmentConnect: (() -> Void)? = nil
     @State private var isDragging = false
 
     var body: some View {
-        MemoRowView(memo: memo)
-            .contentShape(Rectangle())
-            .onTapGesture(perform: onTap)
-            .opacity(isDragging ? 0.5 : 1.0)
-            .scaleEffect(isDragging ? 0.98 : 1.0)
-            .animation(.easeInOut(duration: 0.15), value: isDragging)
-            .onDrag {
-                isDragging = true
-                draggedMemo = memo
-                // ダミーデータ（実際の移動はdraggedMemo状態で管理）
-                return NSItemProvider(object: "" as NSString)
-            }
-            .onChange(of: draggedMemo) { _, newValue in
-                if newValue == nil || newValue?.id != memo.id {
-                    isDragging = false
-                }
-            }
-            .onDrop(of: [.plainText], isTargeted: nil) { _ in
-                // 同じ場所にドロップした場合のリセット
+        ExpandableMemoRowView(
+            memo: memo,
+            expandedMemoID: $expandedMemoID,
+            onEdit: onEdit
+        )
+        .opacity(isDragging ? 0.5 : 1.0)
+        .scaleEffect(isDragging ? 0.98 : 1.0)
+        .animation(.easeInOut(duration: 0.15), value: isDragging)
+        .onDrag {
+            isDragging = true
+            draggedMemo = memo
+            return NSItemProvider(object: "" as NSString)
+        }
+        .onChange(of: draggedMemo) { _, newValue in
+            if newValue == nil || newValue?.id != memo.id {
                 isDragging = false
-                draggedMemo = nil
-                return false
             }
-            .contextMenu {
-                if let onSegmentConnect = onSegmentConnect {
-                    Button(action: onSegmentConnect) {
-                        Label("このセグメントに接続", systemImage: "network")
-                    }
-                    Divider()
+        }
+        .onDrop(of: [.plainText], isTargeted: nil) { _ in
+            isDragging = false
+            draggedMemo = nil
+            return false
+        }
+        .contextMenu {
+            if let onSegmentConnect = onSegmentConnect {
+                Button(action: onSegmentConnect) {
+                    Label("このセグメントに接続", systemImage: "network")
                 }
-                if let onDelete = onDelete {
-                    Button(role: .destructive, action: onDelete) {
-                        Label("削除", systemImage: "trash")
-                    }
+                Divider()
+            }
+            if let onDelete = onDelete {
+                Button(role: .destructive, action: onDelete) {
+                    Label("削除", systemImage: "trash")
                 }
             }
+        }
     }
 }
 

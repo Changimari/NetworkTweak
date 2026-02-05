@@ -18,6 +18,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         appState = AppState()
         // メニューバーコントローラーを初期化
         statusBarController = StatusBarController(appState: appState!)
+
+        // 起動時にアップデートチェック
+        Task {
+            await UpdateChecker.shared.checkOnLaunch()
+        }
     }
 
     /// 初回起動時に全ての権限を要求
