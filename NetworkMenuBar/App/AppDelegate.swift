@@ -7,24 +7,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarController: StatusBarController?
     var appState: AppState?
     private var networkMonitor: NWPathMonitor?
-    private var welcomeWindow: NSWindow?
-
-    private let hasLaunchedBeforeKey = "hasLaunchedBefore"
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // AppStateを初期化
         appState = AppState()
         // メニューバーコントローラーを初期化
         statusBarController = StatusBarController(appState: appState!)
-
-        // 初回起動判定
-        let hasLaunchedBefore = UserDefaults.standard.bool(forKey: hasLaunchedBeforeKey)
-
-        if !hasLaunchedBefore {
-            // 初回起動時：ウェルカムダイアログを表示
-            showWelcomeDialog()
-            UserDefaults.standard.set(true, forKey: hasLaunchedBeforeKey)
-        }
 
         // 初回起動時に全ての権限設定を行う
         Task {
@@ -35,30 +23,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         Task {
             await UpdateChecker.shared.checkOnLaunch()
         }
-    }
-
-    /// 初回起動時のウェルカムダイアログを表示
-    private func showWelcomeDialog() {
-        let alert = NSAlert()
-        alert.messageText = "NetworkTweak へようこそ"
-        alert.informativeText = """
-        ご利用ありがとうございます！
-
-        このアプリはネットワーク設定を管理するため、以下の許可が必要になる場合があります：
-
-        🌐 ローカルネットワークへのアクセス
-        → ネットワーク情報を取得するために必要です
-
-        🔐 管理者権限
-        → IPアドレスやDNSの変更時に必要です
-
-        許可ダイアログが表示されたら「許可」を選択してください。
-        """
-        alert.alertStyle = .informational
-        alert.addButton(withTitle: "はじめる")
-        alert.icon = NSImage(named: NSImage.applicationIconName)
-
-        alert.runModal()
     }
 
     /// 初回起動時に全ての権限を要求
