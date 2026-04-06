@@ -111,11 +111,18 @@ struct AdapterDetailView: View {
             }
             .pickerStyle(.segmented)
             .onChange(of: configMethod) { oldValue, newValue in
-                // 手動に切り替えた時は空欄にする（初回ロード時以外）
+                // 手動に切り替えた時は現在のIPをプリフィルする（初回ロード時以外）
                 if !isInitialLoad && newValue == .manual && oldValue == .dhcp {
-                    ipAddress = ""
-                    subnetMask = "255.255.255.0"  // デフォルト値
-                    router = ""
+                    if let config = adapter.ipConfiguration {
+                        ipAddress = config.ipv4Address ?? ""
+                        subnetMask = config.subnetMask ?? "255.255.255.0"
+                        let routerValue = config.router ?? ""
+                        router = (routerValue == "(null)") ? "" : routerValue
+                    } else {
+                        ipAddress = ""
+                        subnetMask = "255.255.255.0"
+                        router = ""
+                    }
                 }
             }
 
@@ -126,7 +133,26 @@ struct AdapterDetailView: View {
                             autoFillGateway(from: newValue)
                         }
                     IPTextField(text: $subnetMask, placeholder: "サブネットマスク")
-                    IPTextField(text: $router, placeholder: "ルーター（ゲートウェイ）")
+                    IPTextField(text: $router, placeholder: "ルーター（空欄可 - 機器設定用）")
+
+                    HStack {
+                        if router.isEmpty {
+                            Label("ゲートウェイ未設定：他のアダプタの通信に影響しません", systemImage: "info.circle")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                        Button {
+                            ipAddress = ""
+                            subnetMask = "255.255.255.0"
+                            router = ""
+                        } label: {
+                            Label("全クリア", systemImage: "trash")
+                                .font(.caption)
+                        }
+                        .buttonStyle(.borderless)
+                        .foregroundColor(.red)
+                    }
                 }
             } else if configMethod == .dhcp {
                 if let ip = adapter.ipConfiguration?.ipv4Address, !ip.isEmpty {
@@ -294,17 +320,24 @@ struct AdapterDetailView: View {
     private func applyConfiguration() {
         isApplying = true
 
+        // ゲートウェイが空の場合はnilにする（ifconfigモードで設定）
+        let routerValue: String? = (configMethod == .manual && !router.isEmpty) ? router : nil
+
         let config = IPConfiguration(
             configureIPv4: configMethod,
             ipv4Address: configMethod == .manual ? ipAddress : nil,
             subnetMask: configMethod == .manual ? subnetMask : nil,
-            router: configMethod == .manual ? router : nil,
+            router: routerValue,
             dnsServers: dnsServers
         )
 
         Task {
             do {
-                try await appState.networkManager.applyConfiguration(config, to: adapter.displayName)
+                try await appState.networkManager.applyConfiguration(
+                    config,
+                    to: adapter.displayName,
+                    deviceId: adapter.id
+                )
                 await MainActor.run {
                     isApplying = false
                     dismiss()

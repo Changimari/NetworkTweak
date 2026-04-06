@@ -97,7 +97,11 @@ final class NetworkManager: ObservableObject {
     }
 
     /// IP設定を変更（管理者権限が必要）
-    func applyConfiguration(_ config: IPConfiguration, to serviceName: String) async throws {
+    /// - Parameters:
+    ///   - config: 適用するIP設定
+    ///   - serviceName: ネットワークサービス名
+    ///   - deviceId: デバイスID（en0, en1等）。ゲートウェイなし設定時にifconfigで使用
+    func applyConfiguration(_ config: IPConfiguration, to serviceName: String, deviceId: String? = nil) async throws {
         // 変更前の設定をバックアップ
         await backupCurrentConfig(for: serviceName)
 
@@ -108,25 +112,42 @@ final class NetworkManager: ObservableObject {
             try await networkSetupCommand.setDNSServers(service: serviceName, servers: [])
         } else if config.configureIPv4 == .manual {
             guard let ip = config.ipv4Address,
-                  let subnet = config.subnetMask,
-                  let router = config.router else {
-                throw NetworkError.invalidIPAddress("IP設定が不完全です")
+                  let subnet = config.subnetMask else {
+                throw NetworkError.invalidIPAddress("IPアドレスとサブネットマスクは必須です")
             }
-            try await networkSetupCommand.setManualIP(
-                service: serviceName,
-                ip: ip,
-                subnet: subnet,
-                router: router
-            )
 
-            // DNS設定: 指定があれば設定、なければ公開DNS（8.8.8.8, 1.1.1.1）をフォールバック
+            let router = config.router
+            let hasRouter = router != nil && !router!.isEmpty
+
+            if hasRouter {
+                // ゲートウェイありの場合: networksetupで設定（従来通り）
+                try await networkSetupCommand.setManualIP(
+                    service: serviceName,
+                    ip: ip,
+                    subnet: subnet,
+                    router: router!
+                )
+            } else {
+                // ゲートウェイなしの場合: ifconfigで直接設定
+                // これにより他アダプタのデフォルトルートに影響しない
+                guard let device = deviceId, !device.isEmpty else {
+                    throw NetworkError.commandExecutionFailed("デバイスIDが不明なため、ゲートウェイなしの設定ができません")
+                }
+                try await networkSetupCommand.setManualIPWithoutRouter(
+                    device: device,
+                    ip: ip,
+                    subnet: subnet
+                )
+            }
+
+            // DNS設定: 指定があれば設定、なければゲートウェイありの場合のみ公開DNSをフォールバック
             if !config.dnsServers.isEmpty {
                 try await networkSetupCommand.setDNSServers(
                     service: serviceName,
                     servers: config.dnsServers
                 )
-            } else {
-                // 手動IP設定時にDNSが空の場合、公開DNSを設定
+            } else if hasRouter {
+                // ゲートウェイありで手動IP設定時にDNSが空の場合、公開DNSを設定
                 try await networkSetupCommand.setDNSServers(
                     service: serviceName,
                     servers: ["8.8.8.8", "1.1.1.1"]

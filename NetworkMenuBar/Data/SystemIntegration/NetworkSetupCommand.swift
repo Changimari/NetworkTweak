@@ -141,6 +141,51 @@ final class NetworkSetupCommand {
         try await runCommandWithPrivileges(["-setmanual", service, ip, subnet, router])
     }
 
+    /// 固定IPを設定（ゲートウェイなし - 他アダプタのルーティングに影響しない）
+    /// networksetupはゲートウェイ必須のため、ifconfigで直接設定する
+    func setManualIPWithoutRouter(device: String, ip: String, subnet: String) async throws {
+        guard !device.isEmpty else {
+            throw NetworkError.commandExecutionFailed("デバイスIDが不明です")
+        }
+        try await runIfconfigWithPrivileges([device, "inet", ip, "netmask", subnet])
+    }
+
+    /// 管理者権限でifconfigを実行
+    private func runIfconfigWithPrivileges(_ arguments: [String]) async throws {
+        if PrivilegeManager.shared.isSetupCompleted {
+            let process = Process()
+            let pipe = Pipe()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/sudo")
+            process.arguments = ["/sbin/ifconfig"] + arguments
+            process.standardOutput = pipe
+            process.standardError = pipe
+            try process.run()
+            process.waitUntilExit()
+            if process.terminationStatus != 0 {
+                let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                let output = String(data: data, encoding: .utf8) ?? "不明なエラー"
+                throw NetworkError.commandExecutionFailed(output)
+            }
+        } else {
+            let escapedArgs = arguments.map { arg -> String in
+                let escaped = arg.replacingOccurrences(of: "'", with: "'\\''")
+                return "'\(escaped)'"
+            }.joined(separator: " ")
+            let command = "/sbin/ifconfig \(escapedArgs)"
+            let script = "do shell script \"\(command)\" with administrator privileges"
+            var error: NSDictionary?
+            if let scriptObject = NSAppleScript(source: script) {
+                scriptObject.executeAndReturnError(&error)
+                if let error = error {
+                    let message = error[NSAppleScript.errorMessage] as? String ?? "不明なエラー"
+                    throw NetworkError.commandExecutionFailed(message)
+                }
+            } else {
+                throw NetworkError.commandExecutionFailed("AppleScriptの作成に失敗しました")
+            }
+        }
+    }
+
     /// DNSサーバーを設定
     func setDNSServers(service: String, servers: [String]) async throws {
         if servers.isEmpty {
