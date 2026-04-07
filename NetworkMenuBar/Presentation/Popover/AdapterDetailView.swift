@@ -17,7 +17,6 @@ struct AdapterDetailView: View {
     @State private var isApplying: Bool = false
     @State private var showError: Bool = false
     @State private var errorMessage: String = ""
-    @State private var isInitialLoad: Bool = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -110,21 +109,8 @@ struct AdapterDetailView: View {
                 }
             }
             .pickerStyle(.segmented)
-            .onChange(of: configMethod) { oldValue, newValue in
-                // 手動に切り替えた時は現在のIPをプリフィルする（初回ロード時以外）
-                if !isInitialLoad && newValue == .manual && oldValue == .dhcp {
-                    if let config = adapter.ipConfiguration {
-                        ipAddress = config.ipv4Address ?? ""
-                        subnetMask = config.subnetMask ?? "255.255.255.0"
-                        let routerValue = config.router ?? ""
-                        router = (routerValue == "(null)") ? "" : routerValue
-                    } else {
-                        ipAddress = ""
-                        subnetMask = "255.255.255.0"
-                        router = ""
-                    }
-                }
-            }
+            // loadCurrentConfigで常に現在のIPをロード済みのため、
+            // 手動切替時は自動でプリフィルされる（追加処理不要）
 
             if configMethod == .manual {
                 VStack(alignment: .leading, spacing: 8) {
@@ -297,23 +283,17 @@ struct AdapterDetailView: View {
         if let config = adapter.ipConfiguration {
             configMethod = config.configureIPv4
 
-            // 手動設定の場合のみIPアドレス等を読み込む
-            if config.configureIPv4 == .manual {
-                ipAddress = config.ipv4Address ?? ""
-                subnetMask = config.subnetMask ?? ""
-                let routerValue = config.router ?? ""
-                router = (routerValue == "(null)") ? "" : routerValue
-            } else {
-                // DHCPの場合は空欄
-                ipAddress = ""
-                subnetMask = "255.255.255.0"
-                router = ""
-            }
+            // モードに関係なく常に現在のIP情報をロードする
+            // DHCPモード時はフィールド非表示なので影響なし
+            // 手動に切り替えた瞬間にプリフィルされた状態で表示される
+            ipAddress = config.ipv4Address ?? ""
+            subnetMask = (config.subnetMask ?? "").isEmpty ? "255.255.255.0" : config.subnetMask!
+            let routerValue = config.router ?? ""
+            router = (routerValue == "(null)") ? "" : routerValue
 
             // DNSは(null)を除外
             dnsServers = config.dnsServers.filter { $0 != "(null)" && !$0.isEmpty }
         }
-        isInitialLoad = false
     }
 
     /// 設定を適用
