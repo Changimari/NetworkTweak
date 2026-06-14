@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <AssemblyName>NetworkTweak</AssemblyName>
+    <RootNamespace>NetworkTweak</RootNamespace>
+    <Product>NetworkTweak</Product>
+    <Version>1.0.0</Version>
+
+    <!-- 管理者権限を要求するマニフェスト -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- 高DPI対応 -->
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+
+    <!-- Linux/macOS など Windows 以外でも復元・ビルド検証できるようにする -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+</Project>
