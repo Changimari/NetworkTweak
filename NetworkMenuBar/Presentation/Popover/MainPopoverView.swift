@@ -35,6 +35,7 @@ struct MainPopoverView: View {
     @State private var selectedAdapter: NetworkAdapter?
     @State private var showMemoSheet = false
     @State private var showSettings = false
+    @State private var showScan = false
     @State private var isRefreshing = false
     @StateObject private var refreshManager = AutoRefreshManager()
 
@@ -50,10 +51,10 @@ struct MainPopoverView: View {
 
             Divider()
 
-            // アダプター一覧（接続中のみ）
+            // アダプター一覧（接続中 + 無効化されたもの）
             ScrollView {
                 LazyVStack(spacing: 8) {
-                    if appState.networkManager.connectedAdapters.isEmpty {
+                    if appState.networkManager.connectedAdapters.isEmpty && appState.networkManager.disabledAdapters.isEmpty {
                         Text("接続中のネットワークがありません")
                             .foregroundColor(.secondary)
                             .padding()
@@ -61,6 +62,15 @@ struct MainPopoverView: View {
                         ForEach(appState.networkManager.connectedAdapters) { adapter in
                             AdapterRowView(adapter: adapter) {
                                 selectedAdapter = adapter
+                            }
+                        }
+
+                        // 無効化されたアダプター
+                        ForEach(appState.networkManager.disabledAdapters) { adapter in
+                            DisabledAdapterRowView(adapter: adapter) {
+                                Task {
+                                    try? await appState.networkManager.enableService(serviceName: adapter.hardwarePort)
+                                }
                             }
                         }
                     }
@@ -85,6 +95,10 @@ struct MainPopoverView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()
+                .environmentObject(appState)
+        }
+        .sheet(isPresented: $showScan) {
+            NetworkScanView(scanner: appState.networkScanner)
                 .environmentObject(appState)
         }
         .task {
@@ -170,6 +184,14 @@ struct MainPopoverView: View {
             .buttonStyle(.borderless)
             .disabled(isRefreshing)
             .help("更新")
+
+            Button {
+                showScan = true
+            } label: {
+                Image(systemName: "dot.radiowaves.left.and.right")
+            }
+            .buttonStyle(.borderless)
+            .help("ネットワークスキャン")
 
             Button {
                 showMemoSheet = true
@@ -262,6 +284,52 @@ struct AdapterRowView: View {
             .cornerRadius(8)
         }
         .buttonStyle(.plain)
+        .padding(.horizontal, 8)
+    }
+}
+
+/// 無効化されたアダプター行ビュー
+struct DisabledAdapterRowView: View {
+    let adapter: NetworkAdapter
+    let onEnable: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            // ステータスインジケーター
+            Circle()
+                .fill(Color.red)
+                .frame(width: 10, height: 10)
+
+            // アイコン
+            Image(systemName: adapter.iconName)
+                .font(.title2)
+                .foregroundColor(.secondary)
+
+            // 情報
+            VStack(alignment: .leading, spacing: 2) {
+                Text(adapter.displayName)
+                    .font(.system(.body, design: .default))
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+
+                Text("無効")
+                    .font(.caption)
+                    .foregroundColor(.red)
+            }
+
+            Spacer()
+
+            Button("オンに戻す") {
+                onEnable()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.blue)
+            .controlSize(.small)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+        .cornerRadius(8)
         .padding(.horizontal, 8)
     }
 }
@@ -539,11 +607,15 @@ struct ExpandableMemoRowView: View {
                 } label: {
                     HStack {
                         VStack(alignment: .leading) {
-                            Text(memo.name)
+                            // 名前があれば名前、無ければメモ本文をタイトルに（ただのメモ用）
+                            Text(memo.name.isEmpty ? memo.note : memo.name)
                                 .fontWeight(.medium)
-                            Text(memo.ipAddress)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                            if !memo.ipAddress.isEmpty {
+                                Text(memo.ipAddress)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                         Spacer()
                         Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
@@ -554,21 +626,23 @@ struct ExpandableMemoRowView: View {
                 }
                 .buttonStyle(.plain)
 
-                // IPコピーボタン（常に表示）
-                Button {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(memo.ipAddress, forType: .string)
-                    ipCopied = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        ipCopied = false
+                // IPコピーボタン（IPがある時のみ表示）
+                if !memo.ipAddress.isEmpty {
+                    Button {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(memo.ipAddress, forType: .string)
+                        ipCopied = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            ipCopied = false
+                        }
+                    } label: {
+                        Image(systemName: ipCopied ? "checkmark" : "doc.on.doc")
+                            .font(.caption)
+                            .foregroundColor(ipCopied ? .green : .secondary)
                     }
-                } label: {
-                    Image(systemName: ipCopied ? "checkmark" : "doc.on.doc")
-                        .font(.caption)
-                        .foregroundColor(ipCopied ? .green : .secondary)
+                    .buttonStyle(.borderless)
+                    .help("IPをコピー")
                 }
-                .buttonStyle(.borderless)
-                .help("IPをコピー")
             }
 
             // 展開コンテンツ
@@ -594,7 +668,9 @@ struct ExpandableMemoRowView: View {
             }
             .padding(.vertical, 4)
 
-            CopyableFieldRow(label: "IP", value: memo.ipAddress)
+            if !memo.ipAddress.isEmpty {
+                CopyableFieldRow(label: "IP", value: memo.ipAddress)
+            }
 
             if !memo.username.isEmpty {
                 CopyableFieldRow(label: "ユーザー", value: memo.username)
@@ -883,7 +959,7 @@ struct IPMemoEditView: View {
                     dismiss()
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(name.isEmpty || ipAddress.isEmpty)
+                .disabled(name.isEmpty && ipAddress.isEmpty && note.isEmpty)
             }
         }
         .padding()

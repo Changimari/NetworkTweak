@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+    <channel>
+        <title>NetworkTweak</title>
+        <description>NetworkTweak software updates</description>
+        <language>en</language>
+        <!-- リリースごとに scripts/release.sh が item を自動生成します -->
+    </channel>
+</rss>

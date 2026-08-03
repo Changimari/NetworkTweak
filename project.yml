@@ -6,9 +6,14 @@ options:
   xcodeVersion: "15.0"
   createIntermediateGroups: true
 
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.6.0"
+
 settings:
   base:
-    PRODUCT_NAME: NetworkMenuBar
+    PRODUCT_NAME: NetworkTweak
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.9"
@@ -21,6 +26,8 @@ targets:
   NetworkMenuBar:
     type: application
     platform: macOS
+    dependencies:
+      - package: Sparkle
     sources:
       - path: NetworkMenuBar
         excludes:
@@ -35,8 +42,8 @@ targets:
     info:
       path: NetworkMenuBar/Resources/Info.plist
       properties:
-        CFBundleName: NetworkMenuBar
-        CFBundleDisplayName: NetworkMenuBar
+        CFBundleName: NetworkTweak
+        CFBundleDisplayName: NetworkTweak
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleShortVersionString: $(MARKETING_VERSION)
@@ -46,6 +53,13 @@ targets:
         LSUIElement: true
         NSHighResolutionCapable: true
         NSPrincipalClass: NSApplication
+        NSLocalNetworkUsageDescription: ネットワークアダプタの情報取得と空きIPアドレスの検索に使用します。
+        NSAppleEventsUsageDescription: ネットワーク設定の変更に管理者権限が必要です。
+        # Sparkle 自動アップデート
+        SUFeedURL: https://raw.githubusercontent.com/Changimari/NetworkTweak/main/appcast.xml
+        SUPublicEDKey: WTp4bwWyRmmPEfE3/OkXHmL/F86/7NEV4764o0dUM3M=
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
     entitlements:
       path: NetworkMenuBar/Resources/NetworkMenuBar.entitlements
       properties:

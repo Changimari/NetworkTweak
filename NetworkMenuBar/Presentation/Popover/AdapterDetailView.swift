@@ -122,11 +122,10 @@ struct AdapterDetailView: View {
             if configMethod == .manual {
                 VStack(alignment: .leading, spacing: 8) {
                     IPTextField(text: $ipAddress, placeholder: "IPアドレス")
-                        .onChange(of: ipAddress) { _, newValue in
-                            autoFillGateway(from: newValue)
-                        }
                     IPTextField(text: $subnetMask, placeholder: "サブネットマスク")
-                    IPTextField(text: $router, placeholder: "ルーター（ゲートウェイ）")
+                    IPTextField(text: $router, placeholder: "ゲートウェイ（空欄可）", onFocus: {
+                        autoFillGateway(from: ipAddress)
+                    })
                 }
             } else if configMethod == .dhcp {
                 if let ip = adapter.ipConfiguration?.ipv4Address, !ip.isEmpty {
@@ -298,13 +297,13 @@ struct AdapterDetailView: View {
             configureIPv4: configMethod,
             ipv4Address: configMethod == .manual ? ipAddress : nil,
             subnetMask: configMethod == .manual ? subnetMask : nil,
-            router: configMethod == .manual ? router : nil,
+            router: (configMethod == .manual && !router.isEmpty) ? router : nil,
             dnsServers: dnsServers
         )
 
         Task {
             do {
-                try await appState.networkManager.applyConfiguration(config, to: adapter.displayName)
+                try await appState.networkManager.applyConfiguration(config, to: adapter.displayName, deviceId: adapter.id)
                 await MainActor.run {
                     isApplying = false
                     dismiss()
@@ -324,6 +323,7 @@ struct AdapterDetailView: View {
 struct IPTextField: NSViewRepresentable {
     @Binding var text: String
     var placeholder: String
+    var onFocus: (() -> Void)?
 
     func makeNSView(context: Context) -> NSTextField {
         let textField = NSTextField()
@@ -338,6 +338,7 @@ struct IPTextField: NSViewRepresentable {
         if nsView.stringValue != text {
             nsView.stringValue = text
         }
+        context.coordinator.onFocus = onFocus
     }
 
     func makeCoordinator() -> Coordinator {
@@ -346,9 +347,11 @@ struct IPTextField: NSViewRepresentable {
 
     class Coordinator: NSObject, NSTextFieldDelegate {
         var parent: IPTextField
+        var onFocus: (() -> Void)?
 
         init(_ parent: IPTextField) {
             self.parent = parent
+            self.onFocus = parent.onFocus
         }
 
         func controlTextDidChange(_ obj: Notification) {
@@ -376,6 +379,8 @@ struct IPTextField: NSViewRepresentable {
             if let source = TISCopyInputSourceForLanguage("en" as CFString)?.takeRetainedValue() {
                 TISSelectInputSource(source)
             }
+            // フォーカス時コールバック
+            onFocus?()
         }
     }
 }

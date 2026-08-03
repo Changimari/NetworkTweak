@@ -67,6 +67,7 @@ enum ConnectionStatus: String {
     case connected = "Connected"
     case disconnected = "Disconnected"
     case connecting = "Connecting"
+    case disabled = "Disabled"
     case unknown = "Unknown"
 
     var displayName: String {
@@ -74,6 +75,7 @@ enum ConnectionStatus: String {
         case .connected: return "接続中"
         case .disconnected: return "未接続"
         case .connecting: return "接続中..."
+        case .disabled: return "無効"
         case .unknown: return "不明"
         }
     }
@@ -83,6 +85,7 @@ enum ConnectionStatus: String {
         case .connected: return "green"
         case .disconnected: return "gray"
         case .connecting: return "orange"
+        case .disabled: return "red"
         case .unknown: return "gray"
         }
     }

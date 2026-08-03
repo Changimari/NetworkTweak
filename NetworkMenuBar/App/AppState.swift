@@ -9,8 +9,12 @@ final class AppState: ObservableObject {
     @Published var settings: AppSettings
     @Published var ipMemoStore: IPMemoStore
     @Published var networkChangeMonitor: NetworkChangeMonitor
+    let networkScanner = NetworkScanner()  // スキャン結果をシート再表示後も保持
 
     private var cancellables = Set<AnyCancellable>()
+
+    /// ネットワーク変更ハンドラの多重実行を防ぐフラグ
+    private var isHandlingNetworkChange = false
 
     init() {
         self.networkManager = NetworkManager()
@@ -35,27 +39,41 @@ final class AppState: ObservableObject {
 
     /// ネットワーク変更監視を設定
     private func setupNetworkChangeMonitor() {
-        networkChangeMonitor.onNetworkChanged = { [weak self] in
+        networkChangeMonitor.onWiFiLinkChanged = { [weak self] in
             guard let self = self else { return }
-
-            // 設定が有効な場合のみ自動リセット
-            guard self.settings.autoResetOnNetworkChange else { return }
-
-            // 手動IP設定のアダプタをDHCPにリセット
-            for adapter in self.networkManager.connectedAdapters {
-                if adapter.ipConfiguration?.configureIPv4 == .manual {
-                    do {
-                        try await self.networkManager.emergencyResetToDHCP(serviceName: adapter.hardwarePort)
-                        print("Auto-reset to DHCP: \(adapter.hardwarePort)")
-                    } catch {
-                        print("Auto-reset failed for \(adapter.hardwarePort): \(error)")
-                    }
-                }
-            }
+            await self.handleWiFiLinkChanged()
         }
 
         // 監視を開始
         networkChangeMonitor.startMonitoring()
+    }
+
+    /// Wi-FiのAPが切り替わった時の処理
+    ///
+    /// 固定IPのまま別APに移動するとネットに繋がらなくなるため、
+    /// AP切り替えを検知したら固定IPを問答無用でDHCPに戻す。
+    /// 機器設定用APで再び固定にしたい時は手動で設定する。
+    private func handleWiFiLinkChanged() async {
+        guard settings.autoResetOnNetworkChange else { return }
+        guard !isHandlingNetworkChange else { return }
+        isHandlingNetworkChange = true
+        defer { isHandlingNetworkChange = false }
+
+        // ユーザーが直前に固定IPを適用した場合、そのリンクのゆらぎで戻さない（誤リセット防止）
+        if Date().timeIntervalSince(networkManager.lastUserApply) < 15 {
+            return
+        }
+
+        await networkManager.fetchAdapters()
+
+        // Wi-Fiアダプタを特定（接続中のみ対象）
+        guard let wifi = networkManager.adapters.first(where: { $0.type == .wifi }) else { return }
+        guard wifi.status == .connected else { return }
+
+        // 固定IPならDHCPに戻す（DHCPのままなら何もしない）
+        if wifi.ipConfiguration?.configureIPv4 == .manual {
+            try? await networkManager.emergencyResetToDHCP(serviceName: wifi.hardwarePort)
+        }
     }
 }
 
@@ -68,7 +86,7 @@ struct AppSettings: Codable {
     var showIPv6: Bool = false
     var externalIPCheckURL: String = "https://api.ipify.org"
     var autoFillGateway: Bool = true  // ゲートウェイ自動補完
-    var autoResetOnNetworkChange: Bool = true  // ネットワーク変更時に自動でDHCPにリセット
+    var autoResetOnNetworkChange: Bool = true  // Wi-Fi切り替え時に自動でDHCPに戻す
 
     private static let key = "AppSettings"
 
