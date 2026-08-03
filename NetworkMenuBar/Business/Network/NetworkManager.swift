@@ -23,9 +23,21 @@ final class NetworkManager: ObservableObject {
     /// 設定バックアップ（サービス名をキーとして保存）
     private var configBackups: [String: NetworkConfigBackup] = [:]
 
+    /// このアプリから無効化したサービス名
+    @Published private(set) var disabledByApp: Set<String> = []
+
+    /// ユーザーが最後にIP設定を適用した時刻
+    /// 適用直後のWi-Fiリンクのゆらぎを「AP切り替え」と誤認して自動リセットしないための抑制に使う
+    private(set) var lastUserApply: Date = .distantPast
+
     /// 接続中のアダプタのみを返す
     var connectedAdapters: [NetworkAdapter] {
         adapters.filter { $0.status == .connected }
+    }
+
+    /// このアプリから無効化されたアダプタのみを返す
+    var disabledAdapters: [NetworkAdapter] {
+        adapters.filter { $0.status == .disabled && disabledByApp.contains($0.hardwarePort) }
     }
 
     init() {
@@ -47,11 +59,27 @@ final class NetworkManager: ObservableObject {
 
             for service in services {
                 // サービス名からデバイスIDを取得
-                let serviceInfo = serviceOrder.first { $0.service == service }
+                let serviceInfo = serviceOrder.first { $0.service == service.name }
                 let deviceId = serviceInfo?.device ?? ""
 
+                // 無効化されたサービスの場合
+                if service.isDisabled {
+                    let macAddress = try? await networkSetupCommand.getMACAddress(for: deviceId)
+                    let adapter = NetworkAdapter(
+                        id: deviceId.isEmpty ? service.name : deviceId,
+                        hardwarePort: service.name,
+                        displayName: service.name,
+                        macAddress: macAddress,
+                        type: AdapterType.from(hardwarePort: service.name),
+                        status: .disabled,
+                        ipConfiguration: nil
+                    )
+                    newAdapters.append(adapter)
+                    continue
+                }
+
                 // IP設定を取得
-                let ipConfig = try? await networkSetupCommand.getInfo(for: service)
+                let ipConfig = try? await networkSetupCommand.getInfo(for: service.name)
 
                 // MACアドレスを取得
                 let macAddress = try? await networkSetupCommand.getMACAddress(for: deviceId)
@@ -61,11 +89,11 @@ final class NetworkManager: ObservableObject {
                 let status: ConnectionStatus = isLinkActive ? .connected : .disconnected
 
                 let adapter = NetworkAdapter(
-                    id: deviceId.isEmpty ? service : deviceId,
-                    hardwarePort: service,
-                    displayName: service,
+                    id: deviceId.isEmpty ? service.name : deviceId,
+                    hardwarePort: service.name,
+                    displayName: service.name,
                     macAddress: macAddress,
-                    type: AdapterType.from(hardwarePort: service),
+                    type: AdapterType.from(hardwarePort: service.name),
                     status: status,
                     ipConfiguration: ipConfig
                 )
@@ -96,42 +124,78 @@ final class NetworkManager: ObservableObject {
         }
     }
 
+    /// ネットワークサービスを有効化（オフから復帰）
+    func enableService(serviceName: String) async throws {
+        try await networkSetupCommand.setNetworkServiceEnabled(service: serviceName, enabled: true)
+        // 有効化後はDHCPで復帰
+        try await networkSetupCommand.setDHCP(service: serviceName)
+        try await networkSetupCommand.setDNSServers(service: serviceName, servers: [])
+        disabledByApp.remove(serviceName)
+        await fetchAdapters()
+    }
+
     /// IP設定を変更（管理者権限が必要）
-    func applyConfiguration(_ config: IPConfiguration, to serviceName: String) async throws {
+    /// - Parameters:
+    ///   - config: 適用するIP設定
+    ///   - serviceName: ネットワークサービス名
+    ///   - deviceId: デバイスID（en0, en1等）。ゲートウェイなし設定時にifconfigで使用
+    func applyConfiguration(_ config: IPConfiguration, to serviceName: String, deviceId: String? = nil) async throws {
+        // ユーザー適用の時刻を記録（この直後の自動リセットを抑制するため）
+        lastUserApply = Date()
+
         // 変更前の設定をバックアップ
         await backupCurrentConfig(for: serviceName)
 
-        if config.configureIPv4 == .dhcp {
+        if config.configureIPv4 == .off {
+            // ネットワークサービスを無効化
+            try await networkSetupCommand.setNetworkServiceEnabled(service: serviceName, enabled: false)
+            disabledByApp.insert(serviceName)
+        } else if config.configureIPv4 == .dhcp {
             // DHCPに設定
             try await networkSetupCommand.setDHCP(service: serviceName)
             // DHCPの場合、DNSもDHCPから取得するようにリセット
             try await networkSetupCommand.setDNSServers(service: serviceName, servers: [])
         } else if config.configureIPv4 == .manual {
             guard let ip = config.ipv4Address,
-                  let subnet = config.subnetMask,
-                  let router = config.router else {
-                throw NetworkError.invalidIPAddress("IP設定が不完全です")
+                  let subnet = config.subnetMask else {
+                throw NetworkError.invalidIPAddress("IPアドレスとサブネットマスクは必須です")
             }
-            try await networkSetupCommand.setManualIP(
-                service: serviceName,
-                ip: ip,
-                subnet: subnet,
-                router: router
-            )
 
-            // DNS設定: 指定があれば設定、なければ公開DNS（8.8.8.8, 1.1.1.1）をフォールバック
+            let routerValue = config.router ?? ""
+            let hasRouter = !routerValue.isEmpty
+
+            if hasRouter {
+                // ゲートウェイあり: networksetupで設定（デフォルトルートも設定される）
+                try await networkSetupCommand.setManualIP(
+                    service: serviceName,
+                    ip: ip,
+                    subnet: subnet,
+                    router: routerValue
+                )
+            } else {
+                // ゲートウェイなし: networksetupで空ルーター指定
+                // デフォルトルートを張らない = 他アダプタのネット接続を壊さない
+                try await networkSetupCommand.setManualIPWithoutRouter(
+                    service: serviceName,
+                    ip: ip,
+                    subnet: subnet
+                )
+            }
+
+            // DNS設定
             if !config.dnsServers.isEmpty {
                 try await networkSetupCommand.setDNSServers(
                     service: serviceName,
                     servers: config.dnsServers
                 )
-            } else {
-                // 手動IP設定時にDNSが空の場合、公開DNSを設定
+            } else if hasRouter {
+                // ゲートウェイありでDNS未指定の場合のみ公開DNSをフォールバック
                 try await networkSetupCommand.setDNSServers(
                     service: serviceName,
                     servers: ["8.8.8.8", "1.1.1.1"]
                 )
             }
+            // ゲートウェイなしでDNS未指定の場合は何もしない（到達不可能なので）
         }
 
         // 設定を再読み込み

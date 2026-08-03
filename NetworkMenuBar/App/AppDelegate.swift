@@ -19,10 +19,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             await requestAllPermissions()
         }
 
-        // 起動時にアップデートチェック
-        Task {
-            await UpdateChecker.shared.checkOnLaunch()
-        }
+        // Sparkleによる自動アップデートを起動（バックグラウンドで定期チェック）
+        _ = UpdaterManager.shared
     }
 
     /// 初回起動時に全ての権限を要求

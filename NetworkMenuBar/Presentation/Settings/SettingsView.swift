@@ -5,6 +5,7 @@ import ServiceManagement
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
     @StateObject private var updateChecker = UpdateChecker.shared
+    @StateObject private var updater = UpdaterManager.shared
     @Environment(\.dismiss) var dismiss
     @State private var launchAtLogin: Bool = false
     @State private var showSpeedInMenuBar: Bool = false
@@ -82,16 +83,43 @@ struct SettingsView: View {
                         appState.saveSettings()
                     }
 
-                Toggle("ネットワーク変更時に自動でDHCPに戻す", isOn: $autoResetOnNetworkChange)
+                Toggle("Wi-Fi切り替え時に自動でDHCPに戻す", isOn: $autoResetOnNetworkChange)
                     .onChange(of: autoResetOnNetworkChange) { _, newValue in
                         appState.settings.autoResetOnNetworkChange = newValue
                         appState.saveSettings()
                     }
-                    .help("Wi-Fi接続先が変わった時、手動IP設定を自動でDHCPにリセットします")
+                    .help("Wi-FiのAPが切り替わった時、固定IP設定を自動でDHCPに戻します。機器設定用APからネットの繋がるAPに移動した時に、ネットが繋がらなくなるのを防ぎます。")
+            }
+
+            Section("トラブルシューティング") {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("緊急リセット")
+                        Text("接続中の全アダプタをDHCPに戻します")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                    Button {
+                        showEmergencyReset = true
+                    } label: {
+                        Text(isResetting ? "リセット中..." : "リセット")
+                    }
+                    .tint(.orange)
+                    .disabled(isResetting)
+                }
             }
         }
         .formStyle(.grouped)
         .padding()
+        .alert("緊急リセット", isPresented: $showEmergencyReset) {
+            Button("キャンセル", role: .cancel) {}
+            Button("リセット", role: .destructive) {
+                performEmergencyReset()
+            }
+        } message: {
+            Text("接続中の全ネットワークアダプタをDHCPにリセットします。\nネット接続に問題がある場合に使用してください。")
+        }
     }
 
     /// 表示設定タブ
@@ -122,29 +150,41 @@ struct SettingsView: View {
     }
 
     /// このアプリについてタブ
+    /// アプリのバージョン表記（例: "1.0.0 (1)"）
+    private var versionText: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? updateChecker.currentVersion
+        let build = info?["CFBundleVersion"] as? String ?? "1"
+        return "\(version) (\(build))"
+    }
+
     private var aboutTab: some View {
         ScrollView {
-            VStack(spacing: 10) {
+            VStack(spacing: 12) {
                 Image(systemName: "network")
-                    .font(.system(size: 36))
+                    .font(.system(size: 44))
                     .foregroundStyle(.linearGradient(
                         colors: [.blue, .purple, .pink],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ))
 
-                Text("NetworkTweak")
-                    .font(.title3)
-                    .fontWeight(.bold)
+                VStack(spacing: 3) {
+                    Text("NetworkTweak")
+                        .font(.title2)
+                        .fontWeight(.bold)
 
-                Text("v\(updateChecker.currentVersion)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+                    Text("Version \(versionText)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
 
-                Text("DHCPと固定IPを行ったり来たりする人が\nちょっと楽になったり、ならなかったりするアプリ")
-                    .font(.caption)
+                Text("Switch between DHCP and static IP and scan your local network — right from the menu bar.")
+                    .font(.callout)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 24)
 
                 Divider().padding(.horizontal, 40)
 
@@ -153,72 +193,52 @@ struct SettingsView: View {
 
                 Divider().padding(.horizontal, 40)
 
-                VStack(spacing: 2) {
-                    Text("- 豆知識 -")
+                // リンク
+                HStack(spacing: 20) {
+                    if let url = URL(string: "https://github.com/Changimari/NetworkTweak") {
+                        Link(destination: url) {
+                            Label("GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
+                        }
+                    }
+                    if let url = URL(string: "https://github.com/Changimari/NetworkTweak/issues") {
+                        Link(destination: url) {
+                            Label("Support", systemImage: "questionmark.circle")
+                        }
+                    }
+                }
+                .font(.caption)
+
+                // 帰属表示（IEEE OUIデータ）
+                VStack(spacing: 3) {
+                    Text("Acknowledgements")
                         .font(.caption2)
-                        .fontWeight(.medium)
-                    Text("このアプリを使っても\nネットワークの問題は解決しないかもしれません。\nでも、設定画面を開く手間は省けます。たぶん。")
+                        .fontWeight(.semibold)
+                    Text("Device manufacturer names are derived from the IEEE MA-L (OUI) Public Listing.")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(6)
+                .padding(8)
+                .frame(maxWidth: .infinity)
                 .background(Color(NSColor.controlBackgroundColor))
                 .cornerRadius(6)
+                .padding(.horizontal, 24)
 
-                Spacer(minLength: 8)
+                Text("© 2026 NetworkTweak. All rights reserved.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
 
-                Divider().padding(.horizontal, 40)
-
-                // 緊急リセットセクション
-                VStack(spacing: 6) {
-                    Button {
-                        showEmergencyReset = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "exclamationmark.triangle")
-                            Text(isResetting ? "リセット中..." : "緊急リセット")
-                        }
+                Button {
+                    NSApp.terminate(nil)
+                } label: {
+                    Text("Quit NetworkTweak")
                         .font(.caption)
-                    }
-                    .buttonStyle(.bordered)
-                    .tint(.orange)
-                    .disabled(isResetting)
-
-                    Text("全アダプタをDHCPにリセットします")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
                 }
-
-                Spacer(minLength: 8)
-
-                HStack(spacing: 12) {
-                    Button {
-                        updateChecker.openRepositoryPage()
-                    } label: {
-                        Label("GitHub", systemImage: "link")
-                            .font(.caption)
-                    }
-                    .buttonStyle(.bordered)
-
-                    Button(role: .destructive) {
-                        exit(0)
-                    } label: {
-                        Label("お疲れ様でした", systemImage: "power")
-                            .font(.caption)
-                    }
-                    .buttonStyle(.bordered)
-                }
+                .buttonStyle(.bordered)
+                .padding(.top, 4)
             }
             .padding()
-        }
-        .alert("緊急リセット", isPresented: $showEmergencyReset) {
-            Button("キャンセル", role: .cancel) {}
-            Button("リセット", role: .destructive) {
-                performEmergencyReset()
-            }
-        } message: {
-            Text("接続中の全ネットワークアダプタをDHCPにリセットします。\nネット接続に問題がある場合に使用してください。")
         }
     }
 
@@ -237,78 +257,22 @@ struct SettingsView: View {
         }
     }
 
-    /// アップデートセクション
+    /// アップデートセクション（Sparkle）
     private var updateSection: some View {
         VStack(spacing: 8) {
-            if updateChecker.isChecking {
-                HStack {
-                    ProgressView()
-                        .scaleEffect(0.7)
-                    Text("アップデートを確認中...")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            } else if let updateInfo = updateChecker.updateInfo {
-                if updateInfo.isUpdateAvailable {
-                    VStack(spacing: 6) {
-                        HStack {
-                            Image(systemName: "arrow.down.circle.fill")
-                                .foregroundColor(.green)
-                            Text("新しいバージョンがあります!")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                        }
-
-                        Text("v\(updateInfo.currentVersion) → v\(updateInfo.latestVersion)")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-
-                        Button {
-                            updateChecker.openDownloadPage()
-                        } label: {
-                            Label("ダウンロード", systemImage: "arrow.down.to.line")
-                                .font(.caption)
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                    .padding(8)
-                    .background(Color.green.opacity(0.1))
-                    .cornerRadius(8)
-                } else {
-                    HStack {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                        Text("最新バージョンです")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            } else if let error = updateChecker.error {
-                HStack {
-                    Image(systemName: "exclamationmark.triangle")
-                        .foregroundColor(.orange)
-                    Text(error)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-            }
-
             Button {
-                Task {
-                    await updateChecker.checkForUpdates()
-                }
+                updater.checkForUpdates()
             } label: {
-                Label("アップデートを確認", systemImage: "arrow.clockwise")
+                Label("Check for Updates", systemImage: "arrow.down.circle")
                     .font(.caption)
             }
             .buttonStyle(.bordered)
-            .disabled(updateChecker.isChecking)
+            .disabled(!updater.canCheckForUpdates)
 
-            if let lastCheck = updateChecker.lastCheckDate {
-                Text("最終確認: \(lastCheck.formatted(date: .abbreviated, time: .shortened))")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
+            Toggle("Check for updates automatically", isOn: $updater.automaticallyChecksForUpdates)
+                .toggleStyle(.checkbox)
+                .font(.caption2)
+                .foregroundColor(.secondary)
         }
     }
 

@@ -7,49 +7,71 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1835A0E5D3837000FFA38E1B /* NetworkChangeMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB592C5F02070340DF5DB96 /* NetworkChangeMonitor.swift */; };
 		198F71BF0DF42A1277544DA2 /* NetworkSetupCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5996CF82A7AD6FE0394AAEA /* NetworkSetupCommand.swift */; };
+		1A6517458E09BDCEA342F8F0 /* UpdaterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CBDD18CB042D5A05124AAB5 /* UpdaterManager.swift */; };
 		319272ADF12C1CABF7B707EA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 979D2413508E356B431A32B0 /* AppDelegate.swift */; };
 		355F8AEE20078CF9CE63A377 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4E67E742B725CB03F368573D /* Assets.xcassets */; };
+		4EC8875709317E3180B07B84 /* oui.tsv in Resources */ = {isa = PBXBuildFile; fileRef = 4AEF387D7CAD78857A03489F /* oui.tsv */; };
 		54E96BF7914673E8351BA0FD /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BBF1B16C890030C958EA35D /* AppState.swift */; };
 		58742A9D37A9ECB60EF00D24 /* NetworkError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3313E217B345CBE66E0504 /* NetworkError.swift */; };
 		5E1D9707CBEABE793D367D69 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418F346EC674A0A795C0CE39 /* StatusBarController.swift */; };
 		69C853E1BEA1EDA8632A3D03 /* IPMemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4A628E3EBD83854A6C8DB57 /* IPMemo.swift */; };
+		861C05BC776EA1B860FE109C /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B48BD350AF5E1CB6C21EFA24 /* UpdateChecker.swift */; };
+		8E6EED5661C7A23165B1053E /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 052AF601C33CEE3164E87410 /* Sparkle */; };
+		8F3A5727F9992A7C6567F0D5 /* NetworkSpeedMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCFDD1C644DF2967FE0AF57 /* NetworkSpeedMonitor.swift */; };
+		A05D72EC680A9B7501C6573C /* PrivilegeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 770D3EFC113E5AFF3130F4C0 /* PrivilegeManager.swift */; };
 		A4A83AD06AC2EBA2685DAEB0 /* NetworkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69834F72C06BE4A8D7A0B54A /* NetworkAdapter.swift */; };
 		BCAF2AC2A084EBD3D67C5176 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B11EC3C6930D13A5DB3D0C3 /* NetworkManager.swift */; };
+		DC0203B4CB672CC8BEFB8AE6 /* OUILookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424D6444E8DF94539E958657 /* OUILookup.swift */; };
 		DCC097FA562C4D72D0504093 /* NetworkMenuBarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75B1044BD65F9C0478F8AB0 /* NetworkMenuBarApp.swift */; };
+		DCE2A06C733C10AC1CD87327 /* NetworkScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2B28E68D5CD2B074EA550FB /* NetworkScanView.swift */; };
 		F24D5654506AD7659E4636E6 /* MainPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B79EEB11D158B50358EF44 /* MainPopoverView.swift */; };
 		F374779579166DF960200977 /* IPConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E8421915A6B6FC1A8BD012 /* IPConfiguration.swift */; };
+		F4631E4E19D82033102E5263 /* NetworkScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C49B99C6D773F9D1A9B1FC76 /* NetworkScanner.swift */; };
 		F5063467687D99EB778DC1A4 /* AdapterDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BB40E7C510AEEDB27F67CEE /* AdapterDetailView.swift */; };
 		F67DFC8477BCF44A109D4639 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7968750B43558C225A3C3DA /* SettingsView.swift */; };
-		PRIV0001000000000000001 /* PrivilegeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PRIV0002000000000000001 /* PrivilegeManager.swift */; };
-		SPEED001000000000000001 /* NetworkSpeedMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPEED002000000000000001 /* NetworkSpeedMonitor.swift */; };
-		UPDT0001000000000000001 /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = UPDT0002000000000000001 /* UpdateChecker.swift */; };
-		NCHG0001000000000000001 /* NetworkChangeMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = NCHG0002000000000000001 /* NetworkChangeMonitor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0E8E7ACC877A48F0B4E297EF /* NetworkMenuBar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NetworkMenuBar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2BCFDD1C644DF2967FE0AF57 /* NetworkSpeedMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSpeedMonitor.swift; sourceTree = "<group>"; };
+		2CBDD18CB042D5A05124AAB5 /* UpdaterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterManager.swift; sourceTree = "<group>"; };
 		3BB40E7C510AEEDB27F67CEE /* AdapterDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdapterDetailView.swift; sourceTree = "<group>"; };
-		PRIV0002000000000000001 /* PrivilegeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeManager.swift; sourceTree = "<group>"; };
-		SPEED002000000000000001 /* NetworkSpeedMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSpeedMonitor.swift; sourceTree = "<group>"; };
-		UPDT0002000000000000001 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
-		NCHG0002000000000000001 /* NetworkChangeMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkChangeMonitor.swift; sourceTree = "<group>"; };
 		418F346EC674A0A795C0CE39 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
+		424D6444E8DF94539E958657 /* OUILookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OUILookup.swift; sourceTree = "<group>"; };
+		4AEF387D7CAD78857A03489F /* oui.tsv */ = {isa = PBXFileReference; path = oui.tsv; sourceTree = "<group>"; };
 		4E67E742B725CB03F368573D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		52E8421915A6B6FC1A8BD012 /* IPConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPConfiguration.swift; sourceTree = "<group>"; };
 		69834F72C06BE4A8D7A0B54A /* NetworkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkAdapter.swift; sourceTree = "<group>"; };
 		6BBF1B16C890030C958EA35D /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		73458B42D2909D7CD9EE39ED /* NetworkMenuBar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NetworkMenuBar.entitlements; sourceTree = "<group>"; };
+		770D3EFC113E5AFF3130F4C0 /* PrivilegeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegeManager.swift; sourceTree = "<group>"; };
+		8AB592C5F02070340DF5DB96 /* NetworkChangeMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkChangeMonitor.swift; sourceTree = "<group>"; };
 		8B11EC3C6930D13A5DB3D0C3 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		979D2413508E356B431A32B0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9E3313E217B345CBE66E0504 /* NetworkError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkError.swift; sourceTree = "<group>"; };
 		A1C0AEFA2834CB6A73022797 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		B48BD350AF5E1CB6C21EFA24 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		B5996CF82A7AD6FE0394AAEA /* NetworkSetupCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSetupCommand.swift; sourceTree = "<group>"; };
+		C49B99C6D773F9D1A9B1FC76 /* NetworkScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkScanner.swift; sourceTree = "<group>"; };
 		C9B79EEB11D158B50358EF44 /* MainPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainPopoverView.swift; sourceTree = "<group>"; };
+		D2B28E68D5CD2B074EA550FB /* NetworkScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkScanView.swift; sourceTree = "<group>"; };
 		D4A628E3EBD83854A6C8DB57 /* IPMemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPMemo.swift; sourceTree = "<group>"; };
 		E75B1044BD65F9C0478F8AB0 /* NetworkMenuBarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMenuBarApp.swift; sourceTree = "<group>"; };
 		E7968750B43558C225A3C3DA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CDBEECCDBF69119450D385D5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E6EED5661C7A23165B1053E /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		04A5C0160488502B9303991A /* Resources */ = {
@@ -58,8 +80,17 @@
 				4E67E742B725CB03F368573D /* Assets.xcassets */,
 				A1C0AEFA2834CB6A73022797 /* Info.plist */,
 				73458B42D2909D7CD9EE39ED /* NetworkMenuBar.entitlements */,
+				4AEF387D7CAD78857A03489F /* oui.tsv */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		057DF3C1320D0D02A0BA1300 /* Privilege */ = {
+			isa = PBXGroup;
+			children = (
+				770D3EFC113E5AFF3130F4C0 /* PrivilegeManager.swift */,
+			);
+			path = Privilege;
 			sourceTree = "<group>";
 		};
 		221462580AA3D547ED5712B5 /* App */ = {
@@ -84,26 +115,10 @@
 			isa = PBXGroup;
 			children = (
 				9594343900B1DD6C90EE264C /* Network */,
-				PRIV0003000000000000001 /* Privilege */,
-				UPDT0003000000000000001 /* Update */,
+				057DF3C1320D0D02A0BA1300 /* Privilege */,
+				8F705C2B9E717830E671C310 /* Update */,
 			);
 			path = Business;
-			sourceTree = "<group>";
-		};
-		UPDT0003000000000000001 /* Update */ = {
-			isa = PBXGroup;
-			children = (
-				UPDT0002000000000000001 /* UpdateChecker.swift */,
-			);
-			path = Update;
-			sourceTree = "<group>";
-		};
-		PRIV0003000000000000001 /* Privilege */ = {
-			isa = PBXGroup;
-			children = (
-				PRIV0002000000000000001 /* PrivilegeManager.swift */,
-			);
-			path = Privilege;
 			sourceTree = "<group>";
 		};
 		805A1BE666B1CB88AFAC1A0A = {
@@ -123,6 +138,15 @@
 			path = Data;
 			sourceTree = "<group>";
 		};
+		8F705C2B9E717830E671C310 /* Update */ = {
+			isa = PBXGroup;
+			children = (
+				B48BD350AF5E1CB6C21EFA24 /* UpdateChecker.swift */,
+				2CBDD18CB042D5A05124AAB5 /* UpdaterManager.swift */,
+			);
+			path = Update;
+			sourceTree = "<group>";
+		};
 		92B5DDFDC02F7142062B53F8 /* Popover */ = {
 			isa = PBXGroup;
 			children = (
@@ -135,9 +159,11 @@
 		9594343900B1DD6C90EE264C /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				8AB592C5F02070340DF5DB96 /* NetworkChangeMonitor.swift */,
 				8B11EC3C6930D13A5DB3D0C3 /* NetworkManager.swift */,
-				SPEED002000000000000001 /* NetworkSpeedMonitor.swift */,
-				NCHG0002000000000000001 /* NetworkChangeMonitor.swift */,
+				C49B99C6D773F9D1A9B1FC76 /* NetworkScanner.swift */,
+				2BCFDD1C644DF2967FE0AF57 /* NetworkSpeedMonitor.swift */,
+				424D6444E8DF94539E958657 /* OUILookup.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -155,6 +181,7 @@
 			children = (
 				95D34279A44D8BA63964E017 /* MenuBar */,
 				92B5DDFDC02F7142062B53F8 /* Popover */,
+				C0A7B15C43EFD994EE8983E6 /* Scan */,
 				355816C16447B54A44E8650E /* Settings */,
 			);
 			path = Presentation;
@@ -170,6 +197,14 @@
 				04A5C0160488502B9303991A /* Resources */,
 			);
 			path = NetworkMenuBar;
+			sourceTree = "<group>";
+		};
+		C0A7B15C43EFD994EE8983E6 /* Scan */ = {
+			isa = PBXGroup;
+			children = (
+				D2B28E68D5CD2B074EA550FB /* NetworkScanView.swift */,
+			);
+			path = Scan;
 			sourceTree = "<group>";
 		};
 		C971B7EB94D6DDA516756C4A /* Models */ = {
@@ -208,6 +243,7 @@
 			buildPhases = (
 				B530A6D20C99F159C76C675F /* Sources */,
 				2BBAEE5871CDDE06D295B926 /* Resources */,
+				CDBEECCDBF69119450D385D5 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -215,6 +251,7 @@
 			);
 			name = NetworkMenuBar;
 			packageProductDependencies = (
+				052AF601C33CEE3164E87410 /* Sparkle */,
 			);
 			productName = NetworkMenuBar;
 			productReference = 0E8E7ACC877A48F0B4E297EF /* NetworkMenuBar.app */;
@@ -245,6 +282,9 @@
 			);
 			mainGroup = 805A1BE666B1CB88AFAC1A0A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B7238238936C0EA9BC042B61 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
@@ -260,6 +300,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				355F8AEE20078CF9CE63A377 /* Assets.xcassets in Resources */,
+				4EC8875709317E3180B07B84 /* oui.tsv in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,16 +318,20 @@
 				69C853E1BEA1EDA8632A3D03 /* IPMemo.swift in Sources */,
 				F24D5654506AD7659E4636E6 /* MainPopoverView.swift in Sources */,
 				A4A83AD06AC2EBA2685DAEB0 /* NetworkAdapter.swift in Sources */,
+				1835A0E5D3837000FFA38E1B /* NetworkChangeMonitor.swift in Sources */,
 				58742A9D37A9ECB60EF00D24 /* NetworkError.swift in Sources */,
 				BCAF2AC2A084EBD3D67C5176 /* NetworkManager.swift in Sources */,
 				DCC097FA562C4D72D0504093 /* NetworkMenuBarApp.swift in Sources */,
+				DCE2A06C733C10AC1CD87327 /* NetworkScanView.swift in Sources */,
+				F4631E4E19D82033102E5263 /* NetworkScanner.swift in Sources */,
 				198F71BF0DF42A1277544DA2 /* NetworkSetupCommand.swift in Sources */,
-				PRIV0001000000000000001 /* PrivilegeManager.swift in Sources */,
-				SPEED001000000000000001 /* NetworkSpeedMonitor.swift in Sources */,
+				8F3A5727F9992A7C6567F0D5 /* NetworkSpeedMonitor.swift in Sources */,
+				DC0203B4CB672CC8BEFB8AE6 /* OUILookup.swift in Sources */,
+				A05D72EC680A9B7501C6573C /* PrivilegeManager.swift in Sources */,
 				F67DFC8477BCF44A109D4639 /* SettingsView.swift in Sources */,
 				5E1D9707CBEABE793D367D69 /* StatusBarController.swift in Sources */,
-				UPDT0001000000000000001 /* UpdateChecker.swift in Sources */,
-				NCHG0001000000000000001 /* NetworkChangeMonitor.swift in Sources */,
+				861C05BC776EA1B860FE109C /* UpdateChecker.swift in Sources */,
+				1A6517458E09BDCEA342F8F0 /* UpdaterManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -343,7 +388,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.2.2;
+				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = NetworkTweak;
@@ -410,7 +455,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.2.2;
+				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -433,7 +478,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sakai.NetworkTweak;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakai.NetworkMenuBar;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -449,7 +494,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sakai.NetworkTweak;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakai.NetworkMenuBar;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -476,6 +521,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B7238238936C0EA9BC042B61 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		052AF601C33CEE3164E87410 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B7238238936C0EA9BC042B61 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9DB22C209758B35D2EB4414B /* Project object */;
 }

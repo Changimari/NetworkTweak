@@ -5,12 +5,20 @@ final class NetworkSetupCommand {
 
     // MARK: - Query Commands
 
-    /// 全ネットワークサービスを取得
-    func listAllNetworkServices() async throws -> [String] {
+    /// 全ネットワークサービスを取得（無効なサービスも含む）
+    func listAllNetworkServices() async throws -> [(name: String, isDisabled: Bool)] {
         let output = try await runCommand(["-listallnetworkservices"])
         let lines = output.components(separatedBy: .newlines)
-            .filter { !$0.isEmpty && !$0.contains("*") && !$0.starts(with: "An asterisk") }
-        return lines
+            .filter { !$0.isEmpty && !$0.starts(with: "An asterisk") }
+
+        return lines.map { line in
+            if line.hasPrefix("*") {
+                let name = line.replacingOccurrences(of: "*", with: "").trimmingCharacters(in: .whitespaces)
+                return (name: name, isDisabled: true)
+            } else {
+                return (name: line, isDisabled: false)
+            }
+        }
     }
 
     /// ハードウェアポートを取得
@@ -139,6 +147,19 @@ final class NetworkSetupCommand {
     /// 固定IPを設定
     func setManualIP(service: String, ip: String, subnet: String, router: String) async throws {
         try await runCommandWithPrivileges(["-setmanual", service, ip, subnet, router])
+    }
+
+    /// 固定IPを設定（ゲートウェイなし - デフォルトルートを張らず他アダプタに影響しない）
+    /// networksetup の router を空文字にすると、サービス設定として持続する固定IPになり、
+    /// かつデフォルトゲートウェイは設定されない（ifconfig直接指定はサービスがDHCPのままで
+    /// configdに上書きされ持続しないため使わない）
+    func setManualIPWithoutRouter(service: String, ip: String, subnet: String) async throws {
+        try await runCommandWithPrivileges(["-setmanual", service, ip, subnet, ""])
+    }
+
+    /// ネットワークサービスの有効/無効を切り替え
+    func setNetworkServiceEnabled(service: String, enabled: Bool) async throws {
+        try await runCommandWithPrivileges(["-setnetworkserviceenabled", service, enabled ? "on" : "off"])
     }
 
     /// DNSサーバーを設定

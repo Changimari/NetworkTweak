@@ -20,7 +20,7 @@ final class PrivilegeManager {
         guard !isSetupCompleted else { return }
 
         let username = NSUserName()
-        let sudoersContent = "\(username) ALL=(ALL) NOPASSWD: /usr/sbin/networksetup"
+        let sudoersContent = "\(username) ALL=(ALL) NOPASSWD: /usr/sbin/networksetup, /sbin/ifconfig"
 
         // AppleScriptで管理者権限を取得してsudoersファイルを作成
         let script = """
