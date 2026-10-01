@@ -20,17 +20,18 @@ final class StatusBarController: NSObject {
 
         // ポップオーバーを作成
         popover = NSPopover()
-        popover.contentSize = NSSize(width: 320, height: 450)
+        // contentSize は sizingOptions で中身に自動追従させる（固定しない）
         popover.behavior = .transient
         popover.animates = true
 
         super.init()
 
-        // ボタンを設定
+        // ボタンを設定（左クリック=ポップオーバー、右クリック=メニュー）
         if let button = statusItem.button {
             button.image = createMenuBarIcon()
-            button.action = #selector(togglePopover)
+            button.action = #selector(handleClick)
             button.target = self
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
         }
 
         // 外部クリックでポップオーバーを閉じる
@@ -110,6 +111,33 @@ final class StatusBarController: NSObject {
     }
 
     /// ポップオーバーの表示/非表示を切り替え
+    /// クリック処理（左=ポップオーバー、右/Control=メニュー）
+    @objc func handleClick() {
+        let event = NSApp.currentEvent
+        let isRight = event?.type == .rightMouseUp || (event?.modifierFlags.contains(.control) ?? false)
+        if isRight {
+            showContextMenu()
+        } else {
+            togglePopover()
+        }
+    }
+
+    /// 右クリックメニュー（終了）を表示
+    private func showContextMenu() {
+        if popover.isShown { hidePopover() }
+        let menu = NSMenu()
+        let quit = NSMenuItem(title: "NetworkTweakを終了", action: #selector(quitApp), keyEquivalent: "q")
+        quit.target = self
+        menu.addItem(quit)
+        if let button = statusItem.button {
+            menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 4), in: button)
+        }
+    }
+
+    @objc func quitApp() {
+        NSApp.terminate(nil)
+    }
+
     @objc func togglePopover() {
         if popover.isShown {
             hidePopover()
@@ -123,7 +151,9 @@ final class StatusBarController: NSObject {
         // 毎回新しいビューを作成（.taskが確実に実行されるように）
         let contentView = MainPopoverView()
             .environmentObject(appState)
-        popover.contentViewController = NSHostingController(rootView: contentView)
+        let hosting = NSHostingController(rootView: contentView)
+        hosting.sizingOptions = [.preferredContentSize]  // 中身の実サイズにポップオーバーを合わせる（Tahoeの寸法ズレ対策）
+        popover.contentViewController = hosting
 
         if let button = statusItem.button {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
