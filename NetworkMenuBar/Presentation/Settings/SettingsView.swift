@@ -151,6 +151,11 @@ struct SettingsView: View {
 
     /// このアプリについてタブ
     /// アプリのバージョン表記（例: "1.0.0 (1)"）
+    /// 本体の環境言語が日本語か
+    private var isJapanese: Bool {
+        (Locale.preferredLanguages.first ?? "").hasPrefix("ja")
+    }
+
     private var versionText: String {
         let info = Bundle.main.infoDictionary
         let version = info?["CFBundleShortVersionString"] as? String ?? updateChecker.currentVersion
@@ -174,12 +179,14 @@ struct SettingsView: View {
                         .font(.title2)
                         .fontWeight(.bold)
 
-                    Text("Version \(versionText)")
+                    Text(isJapanese ? "バージョン \(versionText)" : "Version \(versionText)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
 
-                Text("Switch between DHCP and static IP and scan your local network — right from the menu bar.")
+                Text(isJapanese
+                     ? "DHCPと固定IPの切り替えやLANスキャンを、メニューバーからサッと。"
+                     : "Switch between DHCP and static IP and scan your local network — right from the menu bar.")
                     .font(.callout)
                     .multilineTextAlignment(.center)
                     .foregroundColor(.secondary)
@@ -202,7 +209,7 @@ struct SettingsView: View {
                     }
                     if let url = URL(string: "https://github.com/Changimari/NetworkTweak/issues") {
                         Link(destination: url) {
-                            Label("Support", systemImage: "questionmark.circle")
+                            Label(isJapanese ? "サポート" : "Support", systemImage: "questionmark.circle")
                         }
                     }
                 }
@@ -210,10 +217,12 @@ struct SettingsView: View {
 
                 // 帰属表示（IEEE OUIデータ）
                 VStack(spacing: 3) {
-                    Text("Acknowledgements")
+                    Text(isJapanese ? "クレジット" : "Acknowledgements")
                         .font(.caption2)
                         .fontWeight(.semibold)
-                    Text("Device manufacturer names are derived from the IEEE MA-L (OUI) Public Listing.")
+                    Text(isJapanese
+                         ? "機器のメーカー名は IEEE MA-L (OUI) 公開リストに基づいています。"
+                         : "Device manufacturer names are derived from the IEEE MA-L (OUI) Public Listing.")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -225,14 +234,15 @@ struct SettingsView: View {
                 .cornerRadius(6)
                 .padding(.horizontal, 24)
 
-                Text("© 2026 NetworkTweak. All rights reserved.")
+                Text(isJapanese ? "© 2026 NetworkTweak" : "© 2026 NetworkTweak. All rights reserved.")
                     .font(.caption2)
                     .foregroundColor(.secondary)
 
                 Button {
-                    NSApp.terminate(nil)
+                    dismiss()
+                    DispatchQueue.main.async { NSApplication.shared.terminate(nil) }
                 } label: {
-                    Text("Quit NetworkTweak")
+                    Text(isJapanese ? "NetworkTweakを終了" : "Quit NetworkTweak")
                         .font(.caption)
                 }
                 .buttonStyle(.bordered)
@@ -263,13 +273,13 @@ struct SettingsView: View {
             Button {
                 updater.checkForUpdates()
             } label: {
-                Label("Check for Updates", systemImage: "arrow.down.circle")
+                Label(isJapanese ? "アップデートを確認" : "Check for Updates", systemImage: "arrow.down.circle")
                     .font(.caption)
             }
             .buttonStyle(.bordered)
             .disabled(!updater.canCheckForUpdates)
 
-            Toggle("Check for updates automatically", isOn: $updater.automaticallyChecksForUpdates)
+            Toggle(isJapanese ? "自動的にアップデートを確認" : "Check for updates automatically", isOn: $updater.automaticallyChecksForUpdates)
                 .toggleStyle(.checkbox)
                 .font(.caption2)
                 .foregroundColor(.secondary)

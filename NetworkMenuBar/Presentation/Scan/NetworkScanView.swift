@@ -8,12 +8,12 @@ struct NetworkScanView: View {
 
     @ObservedObject var scanner: NetworkScanner
     @State private var selectedAdapterID: String?
+    @State private var scanBase: String = ""   // スキャンするセグメント（例: "192.168.0"）手入力可
 
-    /// IPv4を持つスキャン可能なアダプタ
+    /// IPv4を持つアダプタ（169.254含む。手入力できるので除外しない）
     private var scannableAdapters: [NetworkAdapter] {
         appState.networkManager.adapters.filter { adapter in
-            let ip = adapter.ipConfiguration?.ipv4Address ?? ""
-            return ip.split(separator: ".").count == 4 && !ip.hasPrefix("169.254")
+            (adapter.ipConfiguration?.ipv4Address ?? "").split(separator: ".").count == 4
         }
     }
 
@@ -23,6 +23,12 @@ struct NetworkScanView: View {
 
     private var localIP: String? {
         selectedAdapter?.ipConfiguration?.ipv4Address
+    }
+
+    /// scanBase が a.b.c 形式で各オクテット 0-255 か
+    private var isValidBase: Bool {
+        let parts = scanBase.split(separator: ".")
+        return parts.count == 3 && parts.allSatisfy { Int($0).map { $0 >= 0 && $0 <= 255 } ?? false }
     }
 
     var body: some View {
@@ -40,6 +46,10 @@ struct NetworkScanView: View {
             if selectedAdapterID == nil {
                 selectedAdapterID = scannableAdapters.first?.id
             }
+            if scanBase.isEmpty, let ip = localIP { scanBase = baseNetwork(from: ip) }
+        }
+        .onChange(of: selectedAdapterID) { _, _ in
+            if let ip = localIP { scanBase = baseNetwork(from: ip) }
         }
     }
 
@@ -81,16 +91,20 @@ struct NetworkScanView: View {
 
             Spacer()
 
-            if let ip = localIP {
-                let base = baseNetwork(from: ip)
-                Text("\(base).1 〜 \(base).254")
+            // スキャンするセグメント（手入力可。アダプタのIPから自動補完）
+            HStack(spacing: 4) {
+                TextField("192.168.0", text: $scanBase)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 110)
+                    .disabled(scanner.isScanning)
+                Text(".1〜.254")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
 
             Button {
-                guard let ip = localIP else { return }
-                Task { await scanner.scan(localIP: ip) }
+                guard isValidBase else { return }
+                Task { await scanner.scan(localIP: "\(scanBase).1") }
             } label: {
                 if scanner.isScanning {
                     HStack(spacing: 6) {
@@ -104,7 +118,7 @@ struct NetworkScanView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
-            .disabled(localIP == nil || scanner.isScanning)
+            .disabled(!isValidBase || scanner.isScanning)
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
