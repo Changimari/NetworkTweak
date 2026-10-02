@@ -14,8 +14,8 @@ packages:
 settings:
   base:
     PRODUCT_NAME: NetworkTweak
-    MARKETING_VERSION: "1.3.0"
-    CURRENT_PROJECT_VERSION: "2"
+    MARKETING_VERSION: "1.3.1"
+    CURRENT_PROJECT_VERSION: "3"
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
     CODE_SIGN_STYLE: Automatic
@@ -53,6 +53,7 @@ targets:
         LSUIElement: true
         NSHighResolutionCapable: true
         NSPrincipalClass: NSApplication
+        CFBundleLocalizations: [ja, en]
         NSLocalNetworkUsageDescription: ネットワークアダプタの情報取得と空きIPアドレスの検索に使用します。
         NSAppleEventsUsageDescription: ネットワーク設定の変更に管理者権限が必要です。
         # Sparkle 自動アップデート

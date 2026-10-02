@@ -31,6 +31,16 @@ final class HostWindow: NSWindowController, NSWindowDelegate {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     func present() {
+        // 画面中央ではなく、クリック位置（メニューバーのアイコン付近）の真下に出す
+        if let window {
+            let mouse = NSEvent.mouseLocation
+            let screen = NSScreen.screens.first { $0.frame.contains(mouse) } ?? NSScreen.main
+            if let vf = screen?.visibleFrame {
+                let w = window.frame.width
+                let x = min(max(mouse.x - w / 2, vf.minX + 8), vf.maxX - w - 8)
+                window.setFrameTopLeftPoint(NSPoint(x: x, y: vf.maxY - 4))
+            }
+        }
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
     }
