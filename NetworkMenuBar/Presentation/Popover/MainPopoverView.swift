@@ -32,10 +32,6 @@ class AutoRefreshManager: ObservableObject {
 struct MainPopoverView: View {
     @EnvironmentObject var appState: AppState
     @StateObject private var updateChecker = UpdateChecker.shared
-    @State private var selectedAdapter: NetworkAdapter?
-    @State private var showMemoSheet = false
-    @State private var showSettings = false
-    @State private var showScan = false
     @State private var isRefreshing = false
     @StateObject private var refreshManager = AutoRefreshManager()
 
@@ -61,7 +57,7 @@ struct MainPopoverView: View {
                     } else {
                         ForEach(appState.networkManager.connectedAdapters) { adapter in
                             AdapterRowView(adapter: adapter) {
-                                selectedAdapter = adapter
+                                openAdapterWindow(adapter)
                             }
                         }
 
@@ -85,22 +81,6 @@ struct MainPopoverView: View {
         }
         .frame(width: 320, height: 400)
         .background(Color(NSColor.windowBackgroundColor))
-        .sheet(item: $selectedAdapter) { adapter in
-            AdapterDetailView(adapter: adapter)
-                .environmentObject(appState)
-        }
-        .sheet(isPresented: $showMemoSheet) {
-            IPMemoListView()
-                .environmentObject(appState)
-        }
-        .sheet(isPresented: $showSettings) {
-            SettingsView()
-                .environmentObject(appState)
-        }
-        .sheet(isPresented: $showScan) {
-            NetworkScanView(scanner: appState.networkScanner)
-                .environmentObject(appState)
-        }
         .task {
             // 初回更新
             await appState.networkManager.fetchAdapters()
@@ -109,16 +89,41 @@ struct MainPopoverView: View {
             refreshManager.start(interval: appState.settings.refreshInterval)
         }
         .onChange(of: refreshManager.tick) { _, _ in
-            // タイマーが発火したら更新
-            if !showMemoSheet && !showSettings && selectedAdapter == nil {
-                Task {
-                    await appState.networkManager.fetchAdapters()
-                }
-            }
+            Task { await appState.networkManager.fetchAdapters() }
         }
         .onDisappear {
             refreshManager.stop()
         }
+    }
+
+    // MARK: - ウィンドウで開く（ポップオーバー内シートはmacOS 26で崩れるため）
+
+    private func openAdapterWindow(_ adapter: NetworkAdapter) {
+        HostWindow(title: adapter.displayName, size: CGSize(width: 320, height: 500)) { close in
+            AdapterDetailView(adapter: adapter, onClose: close)
+                .environmentObject(appState)
+        }.present()
+    }
+
+    private func openScanWindow() {
+        HostWindow(title: "ネットワークスキャン", size: CGSize(width: 660, height: 520)) { close in
+            NetworkScanView(scanner: appState.networkScanner, onClose: close)
+                .environmentObject(appState)
+        }.present()
+    }
+
+    private func openMemoWindow() {
+        HostWindow(title: "IPメモ", size: CGSize(width: 320, height: 400)) { close in
+            IPMemoListView(onClose: close)
+                .environmentObject(appState)
+        }.present()
+    }
+
+    private func openSettingsWindow() {
+        HostWindow(title: "設定", size: CGSize(width: 400, height: 450)) { close in
+            SettingsView(onClose: close)
+                .environmentObject(appState)
+        }.present()
     }
 
     /// アップデート通知バナー
@@ -186,7 +191,7 @@ struct MainPopoverView: View {
             .help("更新")
 
             Button {
-                showScan = true
+                openScanWindow()
             } label: {
                 Image(systemName: "dot.radiowaves.left.and.right")
             }
@@ -194,7 +199,7 @@ struct MainPopoverView: View {
             .help("ネットワークスキャン")
 
             Button {
-                showMemoSheet = true
+                openMemoWindow()
             } label: {
                 Image(systemName: "note.text")
             }
@@ -202,7 +207,7 @@ struct MainPopoverView: View {
             .help("IPメモ")
 
             Button {
-                showSettings = true
+                openSettingsWindow()
             } label: {
                 Image(systemName: "gearshape")
             }
@@ -337,7 +342,7 @@ struct DisabledAdapterRowView: View {
 /// IPメモ一覧ビュー
 struct IPMemoListView: View {
     @EnvironmentObject var appState: AppState
-    @Environment(\.dismiss) var dismiss
+    var onClose: () -> Void = {}
     @State private var showAddFolderSheet = false
     @State private var showAddMemoSheet = false
     @State private var selectedFolder: IPMemoFolder?
@@ -371,7 +376,7 @@ struct IPMemoListView: View {
                 .help("フォルダを追加")
 
                 Button("閉じる") {
-                    dismiss()
+                    onClose()
                 }
                 .buttonStyle(.borderless)
             }

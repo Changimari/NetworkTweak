@@ -6,7 +6,7 @@ struct SettingsView: View {
     @EnvironmentObject var appState: AppState
     @StateObject private var updateChecker = UpdateChecker.shared
     @StateObject private var updater = UpdaterManager.shared
-    @Environment(\.dismiss) var dismiss
+    var onClose: () -> Void = {}
     @State private var launchAtLogin: Bool = false
     @State private var showSpeedInMenuBar: Bool = false
     @State private var refreshInterval: Double = 2.0
@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var autoResetOnNetworkChange: Bool = true
     @State private var showEmergencyReset = false
     @State private var isResetting = false
+    @State private var selectedTab = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -24,30 +25,32 @@ struct SettingsView: View {
                     .font(.headline)
                 Spacer()
                 Button("閉じる") {
-                    dismiss()
+                    onClose()
                 }
             }
             .padding()
 
             Divider()
 
-            TabView {
-                generalSettingsTab
-                    .tabItem {
-                        Label("一般", systemImage: "gearshape")
-                    }
-
-                displaySettingsTab
-                    .tabItem {
-                        Label("表示", systemImage: "eye")
-                    }
-
-                aboutTab
-                    .tabItem {
-                        Label("About", systemImage: "info.circle")
-                    }
+            // TabView は macOS 26 でツールバー側にタブが出てチラつくため、セグメント＋自前切替
+            Picker("", selection: $selectedTab) {
+                Text("一般").tag(0)
+                Text("表示").tag(1)
+                Text("About").tag(2)
             }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .padding(.horizontal)
             .padding(.top, 10)
+
+            Group {
+                switch selectedTab {
+                case 0: generalSettingsTab
+                case 1: displaySettingsTab
+                default: aboutTab
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(width: 400, height: 450)
         .onAppear {
@@ -239,7 +242,7 @@ struct SettingsView: View {
                     .foregroundColor(.secondary)
 
                 Button {
-                    dismiss()
+                    onClose()
                     DispatchQueue.main.async { NSApplication.shared.terminate(nil) }
                 } label: {
                     Text(isJapanese ? "NetworkTweakを終了" : "Quit NetworkTweak")
