@@ -4,9 +4,9 @@ import SwiftUI
 /// 選択したアダプタと同じセグメント（/24）の .1〜.254 をスキャンして一覧表示する
 struct NetworkScanView: View {
     @EnvironmentObject var appState: AppState
-    @Environment(\.dismiss) var dismiss
 
     @ObservedObject var scanner: NetworkScanner
+    var onClose: () -> Void = {}
     @State private var selectedAdapterID: String?
     @State private var scanBase: String = ""   // スキャンするセグメント（例: "192.168.0"）手入力可
 
@@ -62,7 +62,7 @@ struct NetworkScanView: View {
                 .font(.headline)
             Spacer()
             Button {
-                dismiss()
+                onClose()
             } label: {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundColor(.secondary)

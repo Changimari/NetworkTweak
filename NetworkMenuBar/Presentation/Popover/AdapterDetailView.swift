@@ -4,9 +4,9 @@ import Carbon
 /// アダプタ詳細ビュー
 struct AdapterDetailView: View {
     @EnvironmentObject var appState: AppState
-    @Environment(\.dismiss) var dismiss
 
     let adapter: NetworkAdapter
+    var onClose: () -> Void = {}
 
     @State private var configMethod: IPv4ConfigMethod = .dhcp
     @State private var ipAddress: String = ""
@@ -21,29 +21,9 @@ struct AdapterDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // ヘッダー
-            HStack {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left")
-                    Text("戻る")
-                }
-                .buttonStyle(.borderless)
-
-                Spacer()
-
-                Text(adapter.displayName)
-                    .font(.headline)
-
-                Spacer()
-            }
-            .padding()
-
-            Divider()
-
+            // ヘッダーはウィンドウのタイトルバーが兼ねるので置かない
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 10) {
                     // 接続状態
                     statusSection
 
@@ -100,7 +80,7 @@ struct AdapterDetailView: View {
 
     /// IPv4設定セクション
     private var ipv4Section: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("IPv4設定")
                 .font(.headline)
 
@@ -109,12 +89,14 @@ struct AdapterDetailView: View {
                     Text(method.displayName).tag(method)
                 }
             }
+            .labelsHidden()
             .pickerStyle(.segmented)
             .onChange(of: configMethod) { oldValue, newValue in
-                // 手動に切り替えた時は空欄にする（初回ロード時以外）
+                // 手動に切り替えた時は現在のIP/サブネットをプリフィル（ゲートウェイは欄クリックで補完）
                 if !isInitialLoad && newValue == .manual && oldValue == .dhcp {
-                    ipAddress = ""
-                    subnetMask = "255.255.255.0"  // デフォルト値
+                    ipAddress = adapter.ipConfiguration?.ipv4Address ?? ""
+                    let mask = adapter.ipConfiguration?.subnetMask ?? ""
+                    subnetMask = mask.isEmpty ? "255.255.255.0" : mask
                     router = ""
                 }
             }
@@ -306,7 +288,7 @@ struct AdapterDetailView: View {
                 try await appState.networkManager.applyConfiguration(config, to: adapter.displayName, deviceId: adapter.id)
                 await MainActor.run {
                     isApplying = false
-                    dismiss()
+                    onClose()
                 }
             } catch {
                 await MainActor.run {
@@ -394,18 +376,18 @@ struct DNSPresetButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 4) {
+            HStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.title2)
+                    .font(.body)
                     .foregroundColor(color)
                 Text(label)
                     .font(.caption)
                     .foregroundColor(.primary)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
+            .padding(.vertical, 5)
             .background(Color(NSColor.controlBackgroundColor))
-            .cornerRadius(8)
+            .cornerRadius(6)
         }
         .buttonStyle(.plain)
     }

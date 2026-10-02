@@ -282,7 +282,7 @@ final class NetworkSetupCommand {
         // DHCPかManualかを判定
         if output.contains("DHCP Configuration") {
             config.configureIPv4 = .dhcp
-        } else if output.contains("Manually Using") {
+        } else if output.contains("Manual Configuration") || output.contains("Manually Using") {
             config.configureIPv4 = .manual
         }
 
