@@ -16,7 +16,8 @@ set -euo pipefail
 
 # ===== 設定（自分の環境に合わせて編集） =====
 DEVELOPER_ID="Developer ID Application: Ryosuke Sakai (H4Z24X5BQE)"   # security find-identity -v -p codesigning で確認済み
-NOTARY_PROFILE="NOTARY_PROFILE"                               # 下記 store-credentials で作成する名前（未設定）
+# 公証は App Store Connect APIキーで行う（Apple ID パスワード不要）
+NOTARY_ARGS=(--key "$HOME/.appstoreconnect/private_keys/AuthKey_4ST2FT6VAN.p8" --key-id 4ST2FT6VAN --issuer 544bd841-f70d-4d54-b3ca-b847cbd1c95b)
 GITHUB_REPO="Changimari/NetworkTweak"
 # ============================================
 
@@ -49,16 +50,29 @@ xcodebuild -project NetworkMenuBar.xcodeproj -scheme NetworkMenuBar \
     CODE_SIGN_IDENTITY="$DEVELOPER_ID" \
     CODE_SIGN_STYLE=Manual \
     OTHER_CODE_SIGN_FLAGS="--timestamp --options runtime" \
+    CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO \
     build
 
 APP_PATH="$DERIVED/Build/Products/Release/NetworkTweak.app"
 [ -d "$APP_PATH" ] || { echo "✗ ビルド成果物が見つかりません: $APP_PATH"; exit 1; }
 
+# 1.5 Sparkle の入れ子(XPC/Autoupdate/Updater)は Xcode が再署名しないので内側から署名し直す
+echo "▶︎ Sparkle 再署名..."
+SPK="$APP_PATH/Contents/Frameworks/Sparkle.framework"
+SIGN=(codesign --force --options runtime --timestamp --sign "$DEVELOPER_ID")
+"${SIGN[@]}" "$SPK/Versions/B/XPCServices/Installer.xpc"
+"${SIGN[@]}" --preserve-metadata=entitlements "$SPK/Versions/B/XPCServices/Downloader.xpc"
+"${SIGN[@]}" "$SPK/Versions/B/Autoupdate"
+"${SIGN[@]}" "$SPK/Versions/B/Updater.app"
+"${SIGN[@]}" "$SPK"
+"${SIGN[@]}" --entitlements "$PROJECT_DIR/NetworkMenuBar/Resources/NetworkMenuBar.entitlements" "$APP_PATH"
+codesign --verify --deep --strict "$APP_PATH"
+
 # 2. 公証用にzip化して公証 → ステープル
 echo "▶︎ 公証中..."
 NOTARIZE_ZIP="$BUILD_DIR/notarize.zip"
 ditto -c -k --keepParent "$APP_PATH" "$NOTARIZE_ZIP"
-xcrun notarytool submit "$NOTARIZE_ZIP" --keychain-profile "$NOTARY_PROFILE" --wait
+xcrun notarytool submit "$NOTARIZE_ZIP" "${NOTARY_ARGS[@]}" --wait
 xcrun stapler staple "$APP_PATH"
 
 # 3. 配布用zipを作成（Sparkleが配布するのはこれ）
@@ -72,6 +86,19 @@ echo "▶︎ appcast生成..."
 
 # 生成された appcast.xml をリポジトリ直下へ
 cp "$STAGING_DIR/appcast.xml" "$PROJECT_DIR/appcast.xml"
+
+# 5. 初回インストール用 DMG（署名・公証・ステープル）
+echo "▶︎ DMG作成..."
+DMG_PATH="$BUILD_DIR/NetworkTweak-${VERSION}.dmg"
+DMG_STAGE="$BUILD_DIR/dmg_stage"
+rm -rf "$DMG_STAGE" "$DMG_PATH"; mkdir -p "$DMG_STAGE"
+cp -R "$APP_PATH" "$DMG_STAGE/"
+ln -s /Applications "$DMG_STAGE/Applications"
+hdiutil create -volname "NetworkTweak" -srcfolder "$DMG_STAGE" -ov -format UDZO "$DMG_PATH" >/dev/null
+rm -rf "$DMG_STAGE"
+codesign --force --sign "$DEVELOPER_ID" --timestamp "$DMG_PATH"
+xcrun notarytool submit "$DMG_PATH" "${NOTARY_ARGS[@]}" --wait
+xcrun stapler staple "$DMG_PATH"
 
 echo ""
 echo "✅ ビルド・公証・appcast生成 完了"
