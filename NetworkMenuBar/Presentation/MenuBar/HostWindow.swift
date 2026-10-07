@@ -31,14 +31,14 @@ final class HostWindow: NSWindowController, NSWindowDelegate {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     func present() {
-        // 画面中央ではなく、クリック位置（メニューバーのアイコン付近）の真下に出す
-        if let window {
-            let mouse = NSEvent.mouseLocation
-            let screen = NSScreen.screens.first { $0.frame.contains(mouse) } ?? NSScreen.main
+        // ポップオーバーと同じく、メニューバーアイコンの真下・中央揃えに出す（ポップオーバーは閉じる）
+        StatusBarController.closePopover?()
+        if let window, let icon = StatusBarController.iconScreenFrame {
+            let screen = NSScreen.screens.first { $0.frame.intersects(icon) } ?? NSScreen.main
             if let vf = screen?.visibleFrame {
                 let w = window.frame.width
-                let x = min(max(mouse.x - w / 2, vf.minX + 8), vf.maxX - w - 8)
-                window.setFrameTopLeftPoint(NSPoint(x: x, y: vf.maxY - 4))
+                let x = min(max(icon.midX - w / 2, vf.minX + 8), vf.maxX - w - 8)
+                window.setFrameTopLeftPoint(NSPoint(x: x, y: min(icon.minY, vf.maxY) - 6))
             }
         }
         NSApp.activate(ignoringOtherApps: true)

@@ -5,6 +5,10 @@ import Combine
 /// メニューバーのステータスアイテムを管理するクラス
 @MainActor
 final class StatusBarController: NSObject {
+    /// HostWindow の配置基準（メニューバーアイコンの画面上の位置）とポップオーバーを閉じる処理
+    static var iconScreenFrame: NSRect?
+    static var closePopover: (() -> Void)?
+
     private var statusItem: NSStatusItem
     private var popover: NSPopover
     private var eventMonitor: Any?
@@ -157,6 +161,10 @@ final class StatusBarController: NSObject {
 
         if let button = statusItem.button {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            if let win = button.window {
+                StatusBarController.iconScreenFrame = win.convertToScreen(button.convert(button.bounds, to: nil))
+            }
+            StatusBarController.closePopover = { [weak self] in self?.hidePopover() }
         }
     }
 
